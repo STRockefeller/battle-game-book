@@ -1,6 +1,6 @@
 [gd_scene load_steps=2 format=3 uid="uid://u7x11mqplhrx"]
 
-[ext_resource type="Script" uid="uid://5aidix50wbnl" path="res://scripts/main.gd" id="1_o5qli"]
+[ext_resource type="Script" uid="uid://1atxe58lmcfq" path="res://scripts/DuelManager.gd" id="1_o5qli"]
 
 [node name="Main" type="Node2D"]
 script = ExtResource("1_o5qli")
@@ -11,10 +11,17 @@ script = ExtResource("1_o5qli")
 offset_right = 40.0
 offset_bottom = 40.0
 
-[node name="StoryLabel" type="Label" parent="CanvasLayer/VBoxContainer"]
+[node name="BattleLog" type="Label" parent="CanvasLayer/VBoxContainer"]
 layout_mode = 2
-text = "Hello
-"
 
-[node name="Options" type="VBoxContainer" parent="CanvasLayer/VBoxContainer"]
+[node name="HBoxContainer" type="HBoxContainer" parent="CanvasLayer/VBoxContainer"]
+layout_mode = 2
+
+[node name="Player1UI" type="VBoxContainer" parent="CanvasLayer/VBoxContainer/HBoxContainer"]
+layout_mode = 2
+
+[node name="Player2UI" type="VBoxContainer" parent="CanvasLayer/VBoxContainer/HBoxContainer"]
+layout_mode = 2
+
+[node name="StatusLabel" type="Label" parent="CanvasLayer/VBoxContainer"]
 layout_mode = 2
