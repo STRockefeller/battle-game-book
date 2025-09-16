@@ -17,11 +17,11 @@ func _ready():
 	player2 = make_sample_character("黑騎士")
 	start_duel(player1, player2)
 
-func make_sample_character(name: String) -> Character:
-	var char = Character.new()
-	char.name = name
-	char.max_hp = 20
-	char.reset()
+func make_sample_character(char_name: String) -> Character:
+	var character = Character.new()
+	character.name = char_name
+	character.max_hp = 20
+	character.reset()
 
 	var attack = Move.new()
 	attack.id = "attack"
@@ -35,11 +35,11 @@ func make_sample_character(name: String) -> Character:
 	defend.damage = 0
 	defend.defense = 3
 
-	char.moves = {
+	character.moves = {
 		"attack": attack,
 		"defend": defend
 	}
-	return char
+	return character
 
 func start_duel(c1: Character, c2: Character):
 	player1 = c1
