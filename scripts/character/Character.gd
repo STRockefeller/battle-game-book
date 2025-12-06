@@ -36,6 +36,9 @@ var current_sta: int = 0
 # --- 狀態效果系統 ---
 var effect_manager: StatusEffectManager
 
+# --- 姿態系統 ---
+var stance_manager: StanceManager
+
 # --- 初始化 ---
 func _init() -> void:
 	calculate_base_stats()
@@ -43,6 +46,7 @@ func _init() -> void:
 	current_mp = max_mp
 	current_sta = max_sta
 	effect_manager = StatusEffectManager.new(self)
+	stance_manager = StanceManager.new(self)
 
 # 根據基礎屬性計算所有戰鬥屬性
 func calculate_base_stats() -> void:
@@ -54,6 +58,28 @@ func calculate_base_stats() -> void:
 	eva = agility * 2 + luck
 	crt = luck * 1.0 + agility * 0.5
 	max_sta = constitution * 8
+
+# ==================== 姿態系統整合 ====================
+
+## 改變角色的姿態
+func change_stance(stance_type: Stance.Type, duration: int = -1) -> void:
+	stance_manager.change_stance(stance_type, duration)
+
+## 獲取當前姿態
+func get_current_stance() -> Stance.Type:
+	return stance_manager.get_current_stance_type()
+
+## 獲取當前姿態名稱
+func get_current_stance_name() -> String:
+	return stance_manager.get_current_stance_name()
+
+## 檢查角色是否可以執行特定動作
+func can_perform_action(action_tag: String) -> bool:
+	return stance_manager.can_perform_action(action_tag)
+
+## 檢查是否處於特定姿態
+func is_stance(stance_type: Stance.Type) -> bool:
+	return stance_manager.is_stance(stance_type)
 
 # ==================== 效果系統整合 ====================
 
@@ -67,10 +93,12 @@ func remove_effect(effect_id: String) -> void:
 
 ## 在回合開始時調用
 func on_turn_start() -> void:
+	stance_manager.on_turn_start()
 	effect_manager.on_turn_start()
 
 ## 在回合結束時調用
 func on_turn_end() -> void:
+	stance_manager.on_turn_end()
 	effect_manager.on_turn_end()
 
 ## 獲取指定屬性的有效值（包含修正）
@@ -91,7 +119,13 @@ func get_effective_stat(stat: String) -> int:
 		"eva":
 			base_value = eva
 	
-	return base_value + effect_manager.get_stat_modifier(stat)
+	# 獲取效果修正值
+	var effect_modifier = effect_manager.get_stat_modifier(stat)
+	
+	# 獲取姿態修正值
+	var stance_modifier = stance_manager.get_stance_stat_modifier(stat)
+	
+	return base_value + effect_modifier + stance_modifier
 
 # ==================== 生命值管理 ====================
 
