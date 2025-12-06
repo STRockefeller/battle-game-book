@@ -26,7 +26,7 @@ var crt: float = 0.0
 var max_sta: int = 0
 
 # --- 動作列表 ---
-var available_actions: Array[Action] = []
+@export var available_actions: Array[Action] = []
 
 # --- 初始化 ---
 func _init():
@@ -42,17 +42,3 @@ func calculate_base_stats():
 	eva = agility * 2 + luck
 	crt = luck * 1.0 + agility * 0.5
 	max_sta = constitution * 8
-	
-	# 初始化可用動作
-	_initialize_actions()
-
-# 初始化可用動作（相容舊資源中的 moves 屬性）
-func _initialize_actions():
-	if available_actions.is_empty():
-		# 檢查是否有 moves 屬性（相容舊資源）
-		if has_meta("moves"):
-			var moves = get_meta("moves")
-			if moves is Array:
-				for move in moves:
-					if move is Action:
-						available_actions.append(move)

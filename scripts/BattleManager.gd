@@ -19,18 +19,21 @@ var current_distance: String = "mid"
 var character_states: Dictionary = {}
 
 func _ready():
-	# 初始化玩家
+	# 初始化玩家（複製資源以避免共享狀態）
 	if not player1:
-		player1 = load("res://scripts/Hero.tres")
-	if not player2:
-		player2 = load("res://scripts/Hero.tres")
+		var hero_template = load("res://resources/characters/Hero.tres")
+		if hero_template:
+			player1 = hero_template.duplicate()
 	
-	# 初始化玩家統計
+	if not player2:
+		var hero_template = load("res://resources/characters/Hero.tres")
+		if hero_template:
+			player2 = hero_template.duplicate()
+	
+	# 初始化玩家戰鬥狀態
 	if player1:
-		player1.calculate_base_stats()
 		_initialize_character_state(player1)
 	if player2:
-		player2.calculate_base_stats()
 		_initialize_character_state(player2)
 	
 	characters = [player1, player2]
