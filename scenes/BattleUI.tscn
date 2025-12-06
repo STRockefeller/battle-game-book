@@ -1,0 +1,59 @@
+[gd_scene load_steps=3 format=3 uid="uid://dcegioealgqx7"]
+
+[ext_resource type="Script" uid="uid://horei1vuw404" path="res://scripts/Battle.gd" id="1_d17lq"]
+[ext_resource type="Script" uid="uid://dntsxvohy1u4v" path="res://scripts/BattleManager.gd" id="2_ktx7n"]
+
+[node name="Battle" type="Control"]
+layout_mode = 3
+anchors_preset = 0
+offset_right = 40.0
+offset_bottom = 40.0
+script = ExtResource("1_d17lq")
+
+[node name="HBoxContainer" type="HBoxContainer" parent="."]
+layout_mode = 0
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="Player1Panel" type="VBoxContainer" parent="HBoxContainer"]
+layout_mode = 2
+
+[node name="NameLabel" type="Label" parent="HBoxContainer/Player1Panel"]
+layout_mode = 2
+
+[node name="HpLabel" type="Label" parent="HBoxContainer/Player1Panel"]
+layout_mode = 2
+
+[node name="MpLabel" type="Label" parent="HBoxContainer/Player1Panel"]
+layout_mode = 2
+
+[node name="Player2Panel" type="VBoxContainer" parent="HBoxContainer"]
+layout_mode = 2
+
+[node name="NameLabel" type="Label" parent="HBoxContainer/Player2Panel"]
+layout_mode = 2
+
+[node name="HpLabel" type="Label" parent="HBoxContainer/Player2Panel"]
+layout_mode = 2
+
+[node name="MpLabel" type="Label" parent="HBoxContainer/Player2Panel"]
+layout_mode = 2
+
+[node name="ActionPanel" type="VBoxContainer" parent="."]
+layout_mode = 0
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="InstructionLabel" type="Label" parent="ActionPanel"]
+layout_mode = 2
+
+[node name="MovesContainer" type="VBoxContainer" parent="ActionPanel"]
+layout_mode = 2
+
+[node name="LogBox" type="RichTextLabel" parent="."]
+layout_mode = 0
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="BattleManager" type="Node" parent="."]
+script = ExtResource("2_ktx7n")

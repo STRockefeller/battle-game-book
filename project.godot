@@ -11,6 +11,5 @@ config_version=5
 [application]
 
 config/name="BattleGameBook"
-run/main_scene="uid://u7x11mqplhrx"
 config/features=PackedStringArray("4.5", "Forward Plus")
 config/icon="res://icon.svg"
