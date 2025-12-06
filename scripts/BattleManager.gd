@@ -21,7 +21,7 @@ var character_states: Dictionary = {}
 func _ready():
 	# 初始化玩家（複製資源以避免共享狀態）
 	if not player1:
-		var hero_template = load("res://resources/characters/Hero.tres")
+		var hero_template = load("res://resources/characters/Elise.tres")
 		if hero_template:
 			player1 = hero_template.duplicate()
 	
