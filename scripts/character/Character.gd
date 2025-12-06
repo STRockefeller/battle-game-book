@@ -4,116 +4,55 @@ class_name Character extends Resource
 # --- 基本信息 ---
 @export var name: String = ""
 
-# --- 基礎屬性 ---
+# --- 基礎屬性 (永久性) ---
 @export var strength: int = 0
 @export var intelligence: int = 0
 @export var agility: int = 0
 @export var constitution: int = 0
 @export var luck: int = 0
 
-# 內部使用的屬性名稱
-var STR: int = 0
-var INT: int = 0
-var AGI: int = 0
-var CON: int = 0
-var LUK: int = 0
-
-# --- 最大值 ---
+# --- 最大值 (永久性) ---
 @export var max_hp: int = 100
 @export var max_mp: int = 50
 
-# --- 戰鬥屬性 (動態計算) ---
-var HP: int = 0
-var MP: int = 0
-var STA: int = 0
-var ATK: int = 0
-var MATK: int = 0
-var DEF: int = 0
-var MDEF: int = 0
-var ACC: int = 0
-var EVA: int = 0
-var CRT: float = 0.0
-
-# --- 角色狀態管理 ---
-# 當前姿態，為 Stance 類別的實例
-var current_stance: Stance
-# 當前生效中的狀態效果
-var active_effects: Array[StatusEffect] = []
-# 動作冷卻時間，使用字典來儲存，例如：{"slash": 3}
-var action_cooldowns: Dictionary = {}
+# --- 計算的戰鬥屬性 (唯讀) ---
+var atk: int = 0
+var matk: int = 0
+var def: int = 0
+var mdef: int = 0
+var acc: int = 0
+var eva: int = 0
+var crt: float = 0.0
+var max_sta: int = 0
 
 # --- 動作列表 ---
-# 角色可執行的所有動作，Action 類別的實例陣列
 var available_actions: Array[Action] = []
 
-# --- 角色核心方法 ---
+# --- 初始化 ---
+func _init():
+	calculate_base_stats()
 
 # 根據基礎屬性計算所有戰鬥屬性
-func calculate_stats():
-	# 同步導出屬性到內部屬性
-	STR = strength
-	INT = intelligence
-	AGI = agility
-	CON = constitution
-	LUK = luck
+func calculate_base_stats():
+	atk = strength * 2
+	matk = intelligence * 2
+	def = constitution * 2
+	mdef = intelligence * 2
+	acc = agility * 2
+	eva = agility * 2 + luck
+	crt = luck * 1.0 + agility * 0.5
+	max_sta = constitution * 8
 	
-	HP = CON * 20
-	MP = INT * 15
-	STA = CON * 8
-	
-	ATK = STR * 2
-	MATK = INT * 2
-	
-	DEF = CON * 2
-	MDEF = INT * 2
-	
-	ACC = AGI * 2
-	EVA = AGI * 2 + LUK
-	CRT = LUK * 1.0 + AGI * 0.5
+	# 初始化可用動作
+	_initialize_actions()
 
-# 應用一個狀態效果到角色身上
-func apply_status_effect(effect: StatusEffect):
-	active_effects.append(effect)
-	effect.apply_to(self)
-	
-# 移除一個狀態效果
-func remove_status_effect(effect: StatusEffect):
-	if active_effects.has(effect):
-		effect.remove_from(self)
-		active_effects.erase(effect)
-
-# 更新所有狀態效果（在每回合結束時呼叫）
-func update_status_effects():
-	var effects_to_remove: Array[StatusEffect] = []
-	for effect in active_effects:
-		effect.update()
-		if effect.duration == 0:
-			effects_to_remove.append(effect)
-	
-	for effect in effects_to_remove:
-		remove_status_effect(effect)
-
-# 更新所有動作的冷卻時間
-func update_cooldowns():
-	var actions_to_remove: PackedStringArray = []
-	for action_id in action_cooldowns:
-		action_cooldowns[action_id] -= 1
-		if action_cooldowns[action_id] <= 0:
-			actions_to_remove.append(action_id)
-			
-	for action_id in actions_to_remove:
-		action_cooldowns.erase(action_id)
-
-# 根據當前姿態，獲取可用的動作列表
-func get_available_actions() -> Array[Action]:
-	var usable_actions: Array[Action] = []
-	for action in available_actions:
-		# 檢查冷卻時間
-		if action_cooldowns.has(action.id):
-			continue
-		
-		# 檢查姿態限制
-		if action.is_usable_in(current_stance.id):
-			usable_actions.append(action)
-	
-	return usable_actions
+# 初始化可用動作（相容舊資源中的 moves 屬性）
+func _initialize_actions():
+	if available_actions.is_empty():
+		# 檢查是否有 moves 屬性（相容舊資源）
+		if has_meta("moves"):
+			var moves = get_meta("moves")
+			if moves is Array:
+				for move in moves:
+					if move is Action:
+						available_actions.append(move)

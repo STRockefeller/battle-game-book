@@ -42,6 +42,22 @@ class_name Action
 # 動作當前冷卻時間
 var current_cooldown: int = 0
 
+func can_use(user: Character, battle_manager: BattleManager = null) -> bool:
+	if not battle_manager:
+		return true  # 無法驗證，視為可用
+	
+	# 使用 cost_mp 或 stamina_cost
+	var cost = stamina_cost if stamina_cost > 0 else cost_mp
+	if battle_manager.get_sta(user) < cost:
+		return false
+	
+	# 檢查冷卻時間
+	var cooldowns = battle_manager.get_action_cooldowns(user)
+	if cooldowns.has(id):
+		return false
+	
+	return true
+
 func is_usable_in(current_stance_id: String) -> bool:
 	if allowed_stances.size() > 0:
 		return allowed_stances.has(current_stance_id)

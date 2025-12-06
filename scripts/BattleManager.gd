@@ -14,53 +14,120 @@ var player2: Character
 var characters: Array[Character] = []
 var current_distance: String = "mid"
 
+# 戰鬥狀態 (由 BattleManager 管理)
+# 角色的臨時狀態字典
+var character_states: Dictionary = {}
+
+func _ready():
+	# 初始化玩家
+	if not player1:
+		player1 = load("res://scripts/Hero.tres")
+	if not player2:
+		player2 = load("res://scripts/Hero.tres")
+	
+	# 初始化玩家統計
+	if player1:
+		player1.calculate_base_stats()
+		_initialize_character_state(player1)
+	if player2:
+		player2.calculate_base_stats()
+		_initialize_character_state(player2)
+	
+	characters = [player1, player2]
+
+# 為角色初始化戰鬥狀態
+func _initialize_character_state(character: Character):
+	var state = {
+		"hp": character.max_hp,
+		"mp": character.max_mp,
+		"sta": character.max_sta,
+		"current_stance": "default",
+		"action_cooldowns": {},
+		"active_effects": []
+	}
+	character_states[character] = state
+
+# 獲取角色的 HP
+func get_hp(character: Character) -> int:
+	if character_states.has(character):
+		return character_states[character]["hp"]
+	return character.max_hp
+
+# 設置角色的 HP
+func set_hp(character: Character, value: int):
+	if character_states.has(character):
+		character_states[character]["hp"] = clamp(value, 0, character.max_hp)
+
+# 獲取角色的 MP
+func get_mp(character: Character) -> int:
+	if character_states.has(character):
+		return character_states[character]["mp"]
+	return character.max_mp
+
+# 設置角色的 MP
+func set_mp(character: Character, value: int):
+	if character_states.has(character):
+		character_states[character]["mp"] = clamp(value, 0, character.max_mp)
+
+# 獲取角色的 STA
+func get_sta(character: Character) -> int:
+	if character_states.has(character):
+		return character_states[character]["sta"]
+	return character.max_sta
+
+# 設置角色的 STA
+func set_sta(character: Character, value: int):
+	if character_states.has(character):
+		character_states[character]["sta"] = clamp(value, 0, character.max_sta)
+
+# 獲取角色的冷卻時間字典
+func get_action_cooldowns(character: Character) -> Dictionary:
+	if character_states.has(character):
+		return character_states[character]["action_cooldowns"]
+	return {}
+
 # 執行一個動作
 func execute_action(user: Character, target: Character, action: Action) -> bool:
-	# 1. 檢查冷卻 & 姿態 & stamina
-	if user.action_cooldowns.has(action.id):
-		return false
-	if not action.is_usable_in(user.current_stance.id):
-		return false
-	if user.STA < action.stamina_cost:
+	var user_cooldowns = get_action_cooldowns(user)
+	var user_sta = get_sta(user)
+	
+	# 1. 檢查冷卻
+	if user_cooldowns.has(action.id):
 		return false
 	
-	# 2. 扣 stamina
-	user.STA -= action.stamina_cost
+	# 2. 檢查 stamina 成本
+	var cost = action.stamina_cost if action.stamina_cost > 0 else action.cost_mp
+	if user_sta < cost:
+		return false
 	
-	# 3. 應用 effects_on_use
-	for effect_id in action.effects_on_use:
-		var effect = load_effect(effect_id)
-		if effect:
-			user.apply_status_effect(effect)
+	# 3. 扣 stamina
+	set_sta(user, user_sta - cost)
 	
 	# 4. 計算命中 & 傷害
-	var accuracy = user.ACC + action.accuracy_modifier
-	var damage = user.ATK * action.damage_multiplier
+	var accuracy = user.acc + action.accuracy_modifier
+	var damage = user.atk * action.damage_multiplier
 	if not action.applicable_ranges.has(current_distance):
 		if action.out_of_range_penalty.has("accuracy_modifier"):
 			accuracy += action.out_of_range_penalty["accuracy_modifier"]
 		if action.out_of_range_penalty.has("damage_multiplier"):
 			damage *= action.out_of_range_penalty["damage_multiplier"]
 
-	var hit = _roll_hit(accuracy, target.EVA)
+	var hit = _roll_hit(accuracy, target.eva)
+	var log = "%s 使用了 %s" % [user.name, action.name]
+	
 	if hit:
-		target.HP -= max(0, damage - target.DEF)
-		
-		# 5. 命中後的效果
-		for effect_id in action.effects_on_hit:
-			var effect = load_effect(effect_id)
-			if effect:
-				target.apply_status_effect(effect)
-		if action.target_stance_change_to != "":
-			target.current_stance = load_stance(action.target_stance_change_to)
+		var final_damage = max(0, damage - target.def)
+		set_hp(target, get_hp(target) - final_damage)
+		log += "！造成 %d 傷害" % final_damage
+	else:
+		log += "，但沒有命中！"
 	
-	# 6. 使用者姿態改變
-	if action.user_stance_change_to != "":
-		user.current_stance = load_stance(action.user_stance_change_to)
-	
-	# 7. 設置冷卻
+	# 5. 設置冷卻
 	if action.cooldown > 0:
-		user.action_cooldowns[action.id] = action.cooldown
+		user_cooldowns[action.id] = action.cooldown
+	
+	# 6. 發送信號
+	action_resolved.emit(user, target, action, log)
 	
 	return true
 
