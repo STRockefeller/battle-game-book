@@ -1,12 +1,26 @@
 # Character.gd
 class_name Character extends Resource
 
+# --- 基本信息 ---
+@export var name: String = ""
+
 # --- 基礎屬性 ---
+@export var strength: int = 0
+@export var intelligence: int = 0
+@export var agility: int = 0
+@export var constitution: int = 0
+@export var luck: int = 0
+
+# 內部使用的屬性名稱
 var STR: int = 0
 var INT: int = 0
 var AGI: int = 0
 var CON: int = 0
 var LUK: int = 0
+
+# --- 最大值 ---
+@export var max_hp: int = 100
+@export var max_mp: int = 50
 
 # --- 戰鬥屬性 (動態計算) ---
 var HP: int = 0
@@ -36,6 +50,13 @@ var available_actions: Array[Action] = []
 
 # 根據基礎屬性計算所有戰鬥屬性
 func calculate_stats():
+	# 同步導出屬性到內部屬性
+	STR = strength
+	INT = intelligence
+	AGI = agility
+	CON = constitution
+	LUK = luck
+	
 	HP = CON * 20
 	MP = INT * 15
 	STA = CON * 8

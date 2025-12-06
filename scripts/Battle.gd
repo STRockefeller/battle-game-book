@@ -36,22 +36,22 @@ func _on_turn_started(active_character: Character):
 
 	# 如果是玩家 1，顯示選單
 	if active_character == battle_manager.player1:
-		for move in active_character.moves:
+		for action in active_character.available_actions:
 			var btn = Button.new()
-			btn.text = move.name
-			btn.disabled = not move.can_use(active_character)
-			btn.connect("pressed", Callable(self, "_on_move_selected").bind(move))
+			btn.text = action.name
+			btn.disabled = not action.can_use(active_character)
+			btn.connect("pressed", Callable(self, "_on_action_selected").bind(action))
 			moves_container.add_child(btn)
 	else:
 		# AI 控制玩家 2
-		var move = active_character.moves[0]
-		battle_manager.perform_action(move, battle_manager.player1)
+		var action = active_character.available_actions[0]
+		battle_manager.execute_action(active_character, battle_manager.player1, action)
 
-func _on_move_selected(move: Move):
-	battle_manager.perform_action(move, battle_manager.player2)
+func _on_action_selected(action: Action):
+	battle_manager.execute_action(battle_manager.player1, battle_manager.player2, action)
 	moves_container.queue_free_children()
 
-func _on_action_resolved(user: Character, target: Character, move: Move, log: String):
+func _on_action_resolved(user: Character, target: Character, action: Action, log: String):
 	log_box.append_text(log + "\n")
 	update_status()
 

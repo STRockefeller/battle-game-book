@@ -2,6 +2,15 @@
 extends Node
 class_name BattleManager
 
+# 信號定義
+signal turn_started(active_character: Character)
+signal action_resolved(user: Character, target: Character, action: Action, log: String)
+signal battle_ended(winner: Character)
+
+# 玩家
+var player1: Character
+var player2: Character
+
 var characters: Array[Character] = []
 var current_distance: String = "mid"
 
