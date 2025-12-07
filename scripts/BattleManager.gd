@@ -282,11 +282,15 @@ func _execute_single_action(user: Character, target: Character, action: Action):
 		var base_damage = user.get_effective_stat("atk") * action.damage_multiplier
 		var target_def = target.get_effective_stat("def")
 		result["damage"] = base_damage
-		result["actual_damage"] = max(1, int(base_damage) - int(target_def))
 		
-		# 應用傷害
-		var current_hp = get_current_hp(target)
-		set_current_hp(target, current_hp - result["actual_damage"])
+		if base_damage <= 0.0:
+			# 非攻擊動作（如 Guard）不應造成傷害
+			result["actual_damage"] = 0
+		else:
+			result["actual_damage"] = max(1, int(base_damage) - int(target_def))
+			# 應用傷害
+			var current_hp = get_current_hp(target)
+			set_current_hp(target, current_hp - result["actual_damage"])
 		
 		# 6. 應用狀態效果
 		if action.effects_on_hit.size() > 0:
