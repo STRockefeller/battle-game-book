@@ -50,6 +50,7 @@ func calculate_base_stats() -> void:
 	eva = agility * 2 + luck
 	crt = luck * 1.0 + agility * 0.5
 	max_sta = constitution * 8
+	print("[Character] %s - 計算屬性: ATK=%d, ACC=%d, MAX_STA=%d (CON=%d)" % [name, atk, acc, max_sta, constitution])
 
 # ==================== 姿態系統整合 ====================
 

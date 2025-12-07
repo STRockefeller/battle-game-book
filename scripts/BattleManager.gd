@@ -76,6 +76,11 @@ func _ready():
 	action_cooldowns[player1] = {}
 	action_cooldowns[player2] = {}
 	
+	# 確保所有角色的計算屬性已更新
+	for character in characters:
+		if character:
+			character.calculate_base_stats()
+	
 	# 初始化暫時值
 	character_current_hp[player1] = player1.max_hp
 	character_current_hp[player2] = player2.max_hp
@@ -83,6 +88,11 @@ func _ready():
 	character_current_mp[player2] = player2.max_mp
 	character_current_sta[player1] = player1.max_sta
 	character_current_sta[player2] = player2.max_sta
+	
+	# 驗證初始化
+	print("[BattleManager] 戰鬥初始化完成")
+	print("  Player1: %s - HP=%d, MP=%d, STA=%d (max_sta=%d)" % [player1.name, get_current_hp(player1), get_current_mp(player1), get_current_sta(player1), player1.max_sta])
+	print("  Player2: %s - HP=%d, MP=%d, STA=%d (max_sta=%d)" % [player2.name, get_current_hp(player2), get_current_mp(player2), get_current_sta(player2), player2.max_sta])
 	
 	# 設置 AI（player2 是 AI）
 	if not player2_ai:
@@ -229,28 +239,43 @@ func _execute_single_action(user: Character, target: Character, action: Action):
 		"stance_changed": false
 	}
 	
+	print("[_execute_single_action] %s 使用 %s | 檢查資源成本" % [user.name, action.name])
+	
 	# 1. 檢查冷卻
 	var cooldowns = action_cooldowns[user]
 	if cooldowns.has(action.id):
+		print("  [冷卻中] 冷卻剩餘: %d" % cooldowns[action.id])
 		action_executed.emit(user, target, action, result)
 		return
 	
 	# 2. 檢查資源成本
 	var sta_cost = action.stamina_cost if action.stamina_cost > 0 else 0
 	var mp_cost = action.cost_mp if action.cost_mp > 0 else 0
+	var current_sta = get_current_sta(user)
+	var current_mp = get_current_mp(user)
 	
-	if get_current_sta(user) < sta_cost or get_current_mp(user) < mp_cost:
+	print("  [資源檢查] STA: %d/%d (成本%d), MP: %d/%d (成本%d)" % [current_sta, user.max_sta, sta_cost, current_mp, user.max_mp, mp_cost])
+	
+	if current_sta < sta_cost or current_mp < mp_cost:
+		print("  [資源不足] 動作執行失敗 - 返回")
 		action_executed.emit(user, target, action, result)
 		return
 	
 	# 3. 扣除資源
-	set_current_sta(user, get_current_sta(user) - sta_cost)
-	set_current_mp(user, get_current_mp(user) - mp_cost)
+	set_current_sta(user, current_sta - sta_cost)
+	set_current_mp(user, current_mp - mp_cost)
+	print("  [資源扣除] STA: %d→%d, MP: %d→%d" % [current_sta, get_current_sta(user), current_mp, get_current_mp(user)])
 	
 	# 4. 計算命中
-	var accuracy = user.get_effective_stat("acc") + action.accuracy_modifier
-	var evasion = target.get_effective_stat("eva")
-	result["hit"] = _roll_hit(accuracy, evasion)
+	# 格擋動作（包含 "guard" 標籤）自動成功
+	if "guard" in action.tags:
+		result["hit"] = true
+		print("  [格擋] 自動成功")
+	else:
+		var accuracy = user.get_effective_stat("acc") + action.accuracy_modifier
+		var evasion = target.get_effective_stat("eva")
+		result["hit"] = _roll_hit(accuracy, evasion)
+		print("  [命中判定] %s → %s: 命中=%d, 迴避=%d, 判定=%s" % [user.name, target.name, int(accuracy), int(evasion), result["hit"]])
 	
 	if result["hit"]:
 		# 5. 計算傷害

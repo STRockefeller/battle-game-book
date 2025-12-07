@@ -6,12 +6,14 @@ extends Control
 @onready var p1_name_label = $MainContainer/CharacterStatusPanel/Player1Panel/MarginContainer/VBoxContainer/NameLabel
 @onready var p1_hp_label = $MainContainer/CharacterStatusPanel/Player1Panel/MarginContainer/VBoxContainer/HpLabel
 @onready var p1_mp_label = $MainContainer/CharacterStatusPanel/Player1Panel/MarginContainer/VBoxContainer/MpLabel
+@onready var p1_sta_label = $MainContainer/CharacterStatusPanel/Player1Panel/MarginContainer/VBoxContainer/StaLabel
 @onready var p1_stance_label = $MainContainer/CharacterStatusPanel/Player1Panel/MarginContainer/VBoxContainer/StanceLabel
 
 # 玩家 2 UI 節點
 @onready var p2_name_label = $MainContainer/CharacterStatusPanel/Player2Panel/MarginContainer/VBoxContainer/NameLabel
 @onready var p2_hp_label = $MainContainer/CharacterStatusPanel/Player2Panel/MarginContainer/VBoxContainer/HpLabel
 @onready var p2_mp_label = $MainContainer/CharacterStatusPanel/Player2Panel/MarginContainer/VBoxContainer/MpLabel
+@onready var p2_sta_label = $MainContainer/CharacterStatusPanel/Player2Panel/MarginContainer/VBoxContainer/StaLabel
 @onready var p2_stance_label = $MainContainer/CharacterStatusPanel/Player2Panel/MarginContainer/VBoxContainer/StanceLabel
 
 # 戰鬥日誌和操作面板
@@ -46,12 +48,14 @@ func update_character_status(character: Character, is_player1: bool):
 	var name_label = p1_name_label if is_player1 else p2_name_label
 	var hp_label = p1_hp_label if is_player1 else p2_hp_label
 	var mp_label = p1_mp_label if is_player1 else p2_mp_label
+	var sta_label = p1_sta_label if is_player1 else p2_sta_label
 	var stance_label = p1_stance_label if is_player1 else p2_stance_label
 	
 	# 從後端數據更新 UI（從 BattleManager 獲取暫時值）
 	name_label.text = character.name
 	hp_label.text = "HP: %d / %d" % [battle_manager.get_current_hp(character), character.max_hp]
 	mp_label.text = "MP: %d / %d" % [battle_manager.get_current_mp(character), character.max_mp]
+	sta_label.text = "STA: %d / %d" % [battle_manager.get_current_sta(character), character.max_sta]
 	
 	# 從 stance_manager 取得當前姿態
 	var stance_name = "站立"  # 預設值
