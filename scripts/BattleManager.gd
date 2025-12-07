@@ -31,7 +31,7 @@ var player1_ai: AIBehavior
 var player2_ai: AIBehavior
 
 # 冷卻時間追蹤
-var action_cooldowns: Dictionary = {}  # character -> {action_id -> remaining_cooldown}
+var action_cooldowns: Dictionary[Character, Dictionary] = {}  # character -> {action_id -> remaining_cooldown}
 
 # 當前戰鬥的暫時值（由 BattleManager 管理）
 var character_current_hp: Dictionary = {}  # character -> current_hp
@@ -39,7 +39,7 @@ var character_current_mp: Dictionary = {}  # character -> current_mp
 var character_current_sta: Dictionary = {}  # character -> current_sta
 
 # 當前回合的選擇
-var pending_selections: Dictionary = {}  # character -> Action
+var pending_selections: Dictionary[Character, Action] = {}  # character -> Action
 var selections_completed: int = 0
 
 # 當前距離（用於距離相關的計算）
@@ -73,8 +73,8 @@ func _ready():
 	characters = [player1, player2]
 	
 	# 初始化冷卻追蹤
-	action_cooldowns[player1] = {}
-	action_cooldowns[player2] = {}
+	action_cooldowns[player1] = {} as Dictionary
+	action_cooldowns[player2] = {} as Dictionary
 	
 	# 確保所有角色的計算屬性已更新
 	for character in characters:
@@ -201,8 +201,8 @@ func _apply_actions_phase():
 	_turn_end_phase()
 
 ## 計算動作執行順序（根據敏捷和優先度）
-func _calculate_execution_order() -> Array:
-	var order: Array = []
+func _calculate_execution_order() -> Array[Dictionary]:
+	var order: Array[Dictionary] = []
 	
 	for user in pending_selections:
 		var action = pending_selections[user]
@@ -219,7 +219,7 @@ func _calculate_execution_order() -> Array:
 		})
 	
 	# 按敏捷度和優先度排序（高敏捷和高優先度優先）
-	order.sort_custom(func(a, b):
+	order.sort_custom(func(a: Dictionary, b: Dictionary) -> bool:
 		if a["speed"] != b["speed"]:
 			return a["speed"] > b["speed"]
 		return a["priority"] > b["priority"]
@@ -345,8 +345,8 @@ func _check_battle_end() -> bool:
 	return false
 
 ## 獲取角色的可用動作列表
-func _get_available_actions(character: Character) -> Array:
-	var available = []
+func _get_available_actions(character: Character) -> Array[Action]:
+	var available: Array[Action] = []
 	
 	# 檢查姿態限制
 	for action in character.available_actions:
@@ -354,6 +354,30 @@ func _get_available_actions(character: Character) -> Array:
 			available.append(action)
 	
 	return available
+
+## 取得動作狀態（UI 用來顯示可用性）
+func get_action_state(character: Character, action: Action) -> Dictionary:
+	var cooldown_remaining: int = 0
+	if action_cooldowns.has(character):
+		var cooldowns: Dictionary = action_cooldowns[character]
+		if cooldowns.has(action.id):
+			cooldown_remaining = int(cooldowns[action.id])
+
+	var sta_cost: int = max(action.stamina_cost, 0)
+	var mp_cost: int = max(action.cost_mp, 0)
+	var current_sta: int = get_current_sta(character)
+	var current_mp: int = get_current_mp(character)
+	var insufficient: bool = current_sta < sta_cost or current_mp < mp_cost
+
+	return {
+		"cooldown": cooldown_remaining,
+		"insufficient": insufficient,
+		"disabled": cooldown_remaining > 0 or insufficient,
+		"sta_cost": sta_cost,
+		"mp_cost": mp_cost,
+		"current_sta": current_sta,
+		"current_mp": current_mp
+	}
 
 ## 命中判定
 func _roll_hit(accuracy: float, evasion: float) -> bool:
