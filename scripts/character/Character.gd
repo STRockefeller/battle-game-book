@@ -46,7 +46,7 @@ func calculate_base_stats() -> void:
 	matk = intelligence * 2
 	def = constitution * 2
 	mdef = intelligence * 2
-	acc = agility * 2
+	acc = agility * 5
 	eva = agility * 2 + luck
 	crt = luck * 1.0 + agility * 0.5
 	max_sta = constitution * 8
