@@ -21,12 +21,17 @@ extends Control
 
 func _ready():
 	# 連接 BattleManager 信號
-	battle_manager.connect("turn_started", Callable(self, "_on_turn_started"))
-	battle_manager.connect("action_resolved", Callable(self, "_on_action_resolved"))
+	battle_manager.connect("turn_start_selection", Callable(self, "_on_turn_start_selection"))
+	battle_manager.connect("all_actions_selected", Callable(self, "_on_all_actions_selected"))
+	battle_manager.connect("action_executed", Callable(self, "_on_action_executed"))
+	battle_manager.connect("turn_ended", Callable(self, "_on_turn_ended"))
 	battle_manager.connect("battle_ended", Callable(self, "_on_battle_ended"))
 	
 	# 初始化 UI
 	update_all_status()
+	
+	# 開始戰鬥
+	battle_manager.start_battle()
 
 ## 更新所有角色狀態顯示
 func update_all_status():
@@ -65,7 +70,7 @@ func add_log_entry(message: String, color: String = "white"):
 	var formatted_message = "[color=%s]%s[/color]" % [color, message]
 	log_content.append_text(formatted_message + "\n")
 
-func _on_turn_started(active_character: Character):
+func _on_turn_start_selection(player1: Character, player2: Character):
 	update_all_status()
 	
 	# 清空之前的行動按鈕
@@ -73,33 +78,68 @@ func _on_turn_started(active_character: Character):
 		child.queue_free()
 	
 	# 更新提示文本
-	instruction_label.text = "%s 的回合，請選擇動作：" % active_character.name
-
-	# 如果是玩家 1，顯示操作選單
-	if active_character == battle_manager.player1:
-		for action in active_character.available_moves:
-			var btn = Button.new()
-			btn.text = action.name
-			btn.connect("pressed", Callable(self, "_on_action_selected").bind(action))
-			moves_container.add_child(btn)
-	else:
-		# AI 控制玩家 2 - 選擇第一個可用的動作
-		if active_character.available_moves.size() > 0:
-			var action = active_character.available_moves[0]
-			battle_manager.execute_action(active_character, battle_manager.player1, action)
-
-func _on_action_selected(action: Action):
-	battle_manager.execute_action(battle_manager.player1, battle_manager.player2, action)
+	instruction_label.text = "請選擇行動 (第 %d 回合)" % battle_manager.current_turn
 	
+	# 顯示玩家 1 的可用動作按鈕
+	var available_actions = battle_manager._get_available_actions(player1)
+	
+	for action in available_actions:
+		var btn = Button.new()
+		btn.text = "%s (MP: %d, STA: %d)" % [action.name, action.cost_mp, action.cost_stamina]
+		btn.connect("pressed", Callable(self, "_on_action_selected").bind(action))
+		moves_container.add_child(btn)
+	
+	# 記錄日誌
+	add_log_entry("第 %d 回合開始" % battle_manager.current_turn, "yellow")
+
+## 玩家選擇了動作
+func _on_action_selected(action: Action):
+	battle_manager.player_select_action(action)
+	
+	# 清空按鈕（等待動作解析）
+	for child in moves_container.get_children():
+		child.queue_free()
+	
+	instruction_label.text = "等待所有選擇完成..."
+
+## 所有選擇都完成 - 動作即將執行
+func _on_all_actions_selected():
+	add_log_entry("所有選擇完成，動作執行中...", "cyan")
+
+## 動作執行
+func _on_action_executed(user: Character, target: Character, action: Action, result: Dictionary):
+	var log_message = "%s 使用了 %s" % [user.name, action.name]
+	var color = "white"
+	
+	if result["hit"]:
+		log_message += "！命中！造成 %d 傷害" % result["actual_damage"]
+		color = "red"
+		
+		if result["status_applied"]:
+			log_message += "，施加了 %s" % result["status_applied"]
+		
+		if result["stance_changed"]:
+			log_message += "，改變了姿態"
+	else:
+		log_message += "，但沒有命中！"
+		color = "gray"
+	
+	add_log_entry(log_message, color)
+	update_all_status()
+
+## 回合結束
+func _on_turn_ended():
+	add_log_entry("回合結束", "yellow")
+
+## 戰鬥結束
+func _on_battle_ended(winner: Character):
 	# 清空按鈕
 	for child in moves_container.get_children():
 		child.queue_free()
-
-func _on_action_resolved(user: Character, target: Character, action: Action, log: String):
-	add_log_entry(log)
-	update_all_status()
-
-func _on_battle_ended(winner: Character):
-	instruction_label.text = "戰鬥結束！勝利者是 %s" % winner.name
-	for child in moves_container.get_children():
-		child.queue_free()
+	
+	if winner:
+		instruction_label.text = "戰鬥結束！勝利者是 %s" % winner.name
+		add_log_entry("戰鬥結束！勝利者是 %s！" % winner.name, "gold")
+	else:
+		instruction_label.text = "戰鬥結束！平局"
+		add_log_entry("戰鬥結束！平局", "gold")
