@@ -25,11 +25,6 @@ var eva: int = 0
 var crt: float = 0.0
 var max_sta: int = 0
 
-# --- 當前值 ---
-var current_hp: int = 0
-var current_mp: int = 0
-var current_sta: int = 0
-
 # --- 動作列表 ---
 @export var available_actions: Array[Action] = []
 
@@ -42,9 +37,6 @@ var stance_manager: StanceManager
 # --- 初始化 ---
 func _init() -> void:
 	calculate_base_stats()
-	current_hp = max_hp
-	current_mp = max_mp
-	current_sta = max_sta
 	effect_manager = StatusEffectManager.new(self)
 	stance_manager = StanceManager.new(self)
 
@@ -131,16 +123,16 @@ func get_effective_stat(stat: String) -> int:
 
 ## 造成傷害（用於效果觸發時調用）
 func take_damage(damage: int) -> void:
-	current_hp -= damage
-	current_hp = max(0, current_hp)
-	print("%s 受到 %d 傷害，當前 HP: %d/%d" % [name, damage, current_hp, max_hp])
+	# 此方法現在由 BattleManager 調用並管理傷害
+	# Character 本身不再維護 current_hp
+	print("%s 受到 %d 傷害" % [name, damage])
 
 ## 恢復生命值（用於效果觸發時調用）
 func heal(amount: int) -> void:
-	current_hp += amount
-	current_hp = min(current_hp, max_hp)
-	print("%s 恢復 %d 生命值，當前 HP: %d/%d" % [name, amount, current_hp, max_hp])
+	# 此方法現在由 BattleManager 調用並管理治療
+	# Character 本身不再維護 current_hp
+	print("%s 恢復 %d 生命值" % [name, amount])
 
-## 檢查角色是否還活著
-func is_alive() -> bool:
+## 檢查角色是否還活著（需要由 BattleManager 提供 current_hp）
+func is_alive(current_hp: int) -> bool:
 	return current_hp > 0

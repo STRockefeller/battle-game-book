@@ -48,10 +48,10 @@ func update_character_status(character: Character, is_player1: bool):
 	var mp_label = p1_mp_label if is_player1 else p2_mp_label
 	var stance_label = p1_stance_label if is_player1 else p2_stance_label
 	
-	# 從後端數據更新 UI（使用 BattleManager 或直接從 Character）
+	# 從後端數據更新 UI（從 BattleManager 獲取暫時值）
 	name_label.text = character.name
-	hp_label.text = "HP: %d / %d" % [character.current_hp, character.max_hp]
-	mp_label.text = "MP: %d / %d" % [character.current_mp, character.max_mp]
+	hp_label.text = "HP: %d / %d" % [battle_manager.get_current_hp(character), character.max_hp]
+	mp_label.text = "MP: %d / %d" % [battle_manager.get_current_mp(character), character.max_mp]
 	
 	# 從 stance_manager 取得當前姿態
 	var stance_name = "站立"  # 預設值

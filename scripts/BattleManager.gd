@@ -33,6 +33,11 @@ var player2_ai: AIBehavior
 # 冷卻時間追蹤
 var action_cooldowns: Dictionary = {}  # character -> {action_id -> remaining_cooldown}
 
+# 當前戰鬥的暫時值（由 BattleManager 管理）
+var character_current_hp: Dictionary = {}  # character -> current_hp
+var character_current_mp: Dictionary = {}  # character -> current_mp
+var character_current_sta: Dictionary = {}  # character -> current_sta
+
 # 當前回合的選擇
 var pending_selections: Dictionary = {}  # character -> Action
 var selections_completed: int = 0
@@ -70,6 +75,14 @@ func _ready():
 	# 初始化冷卻追蹤
 	action_cooldowns[player1] = {}
 	action_cooldowns[player2] = {}
+	
+	# 初始化暫時值
+	character_current_hp[player1] = player1.max_hp
+	character_current_hp[player2] = player2.max_hp
+	character_current_mp[player1] = player1.max_mp
+	character_current_mp[player2] = player2.max_mp
+	character_current_sta[player1] = player1.max_sta
+	character_current_sta[player2] = player2.max_sta
 	
 	# 設置 AI（player2 是 AI）
 	if not player2_ai:
@@ -226,13 +239,13 @@ func _execute_single_action(user: Character, target: Character, action: Action):
 	var sta_cost = action.stamina_cost if action.stamina_cost > 0 else 0
 	var mp_cost = action.cost_mp if action.cost_mp > 0 else 0
 	
-	if user.current_sta < sta_cost or user.current_mp < mp_cost:
+	if get_current_sta(user) < sta_cost or get_current_mp(user) < mp_cost:
 		action_executed.emit(user, target, action, result)
 		return
 	
 	# 3. 扣除資源
-	user.current_sta -= sta_cost
-	user.current_mp -= mp_cost
+	set_current_sta(user, get_current_sta(user) - sta_cost)
+	set_current_mp(user, get_current_mp(user) - mp_cost)
 	
 	# 4. 計算命中
 	var accuracy = user.get_effective_stat("acc") + action.accuracy_modifier
@@ -247,7 +260,8 @@ func _execute_single_action(user: Character, target: Character, action: Action):
 		result["actual_damage"] = max(1, int(base_damage) - int(target_def))
 		
 		# 應用傷害
-		target.take_damage(result["actual_damage"])
+		var current_hp = get_current_hp(target)
+		set_current_hp(target, current_hp - result["actual_damage"])
 		
 		# 6. 應用狀態效果
 		if action.effects_on_hit.size() > 0:
@@ -297,10 +311,10 @@ func _turn_end_phase():
 
 ## 檢查戰鬥是否結束
 func _check_battle_end() -> bool:
-	if player1.current_hp <= 0:
+	if get_current_hp(player1) <= 0:
 		battle_ended.emit(player2)
 		return true
-	if player2.current_hp <= 0:
+	if get_current_hp(player2) <= 0:
 		battle_ended.emit(player1)
 		return true
 	return false
@@ -321,3 +335,35 @@ func _roll_hit(accuracy: float, evasion: float) -> bool:
 	var hit_chance = accuracy - evasion
 	hit_chance = clamp(hit_chance, 5, 95)  # 保證至少有 5% 命中和迴避機率
 	return randf() * 100 < hit_chance
+
+# ==================== 暫時值管理方法 ====================
+
+## 獲取角色當前 HP
+func get_current_hp(character: Character) -> int:
+	if character_current_hp.has(character):
+		return character_current_hp[character]
+	return character.max_hp
+
+## 設置角色當前 HP
+func set_current_hp(character: Character, value: int) -> void:
+	character_current_hp[character] = clamp(value, 0, character.max_hp)
+
+## 獲取角色當前 MP
+func get_current_mp(character: Character) -> int:
+	if character_current_mp.has(character):
+		return character_current_mp[character]
+	return character.max_mp
+
+## 設置角色當前 MP
+func set_current_mp(character: Character, value: int) -> void:
+	character_current_mp[character] = clamp(value, 0, character.max_mp)
+
+## 獲取角色當前 STA
+func get_current_sta(character: Character) -> int:
+	if character_current_sta.has(character):
+		return character_current_sta[character]
+	return character.max_sta
+
+## 設置角色當前 STA
+func set_current_sta(character: Character, value: int) -> void:
+	character_current_sta[character] = clamp(value, 0, character.max_sta)
