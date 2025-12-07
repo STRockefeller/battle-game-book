@@ -8,7 +8,7 @@ class_name Action
 @export var description: String
 
 # --- 成本 ---
-@export var stamina_cost: int = 0
+@export var cost_stamina: int = 0
 @export var cost_mp: int = 0 
 @export var cast_time: int = 0
 @export var cooldown: int = 0
@@ -46,8 +46,8 @@ func can_use(user: Character, battle_manager: BattleManager = null) -> bool:
 	if not battle_manager:
 		return true  # 無法驗證，視為可用
 	
-	# 使用 cost_mp 或 stamina_cost
-	var cost = stamina_cost if stamina_cost > 0 else cost_mp
+	# 使用 cost_mp 或 cost_stamina
+	var cost = cost_stamina if cost_stamina > 0 else cost_mp
 	if battle_manager.get_sta(user) < cost:
 		return false
 	

@@ -107,7 +107,7 @@ func _on_turn_start_selection(player1: Character, player2: Character):
 		var insufficient_text = ""
 		if state["insufficient"]:
 			insufficient_text = " - 資源不足"
-		btn.text = "%s (MP: %d, STA: %d)%s%s" % [action.name, action.cost_mp, action.stamina_cost, cooldown_text, insufficient_text]
+		btn.text = "%s (MP: %d, STA: %d)%s%s" % [action.name, action.cost_mp, action.cost_stamina, cooldown_text, insufficient_text]
 		btn.disabled = state["disabled"]
 		btn.tooltip_text = "MP %d/%d, STA %d/%d" % [state["current_mp"], player1.max_mp, state["current_sta"], player1.max_sta]
 		btn.connect("pressed", Callable(self, "_on_action_selected").bind(action))

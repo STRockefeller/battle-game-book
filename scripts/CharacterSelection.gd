@@ -16,15 +16,13 @@ var selected_ai_behavior: String = "random"  # 預設 AI 行為
 # 可用的角色資源路徑（動態生成）
 var character_resources: Array[String] = []
 
-# 可用的 AI 行為
-var ai_behaviors: Array[String] = [
-	"random",
-	# 未來可以加入更多 AI 類型
-]
+# 可用的 AI 行為（從工廠獲取）
+var ai_behaviors: Array[Dictionary] = []
 
 func _ready():
 	_scan_character_resources()
 	_load_characters()
+	_load_ai_behaviors()
 	_setup_ai_selection()
 	confirm_button.disabled = true
 
@@ -84,21 +82,23 @@ func _create_character_button(character: Character, is_player: bool) -> Button:
 	
 	return btn
 
+## 從 AIFactory 加載可用的 AI 類型
+func _load_ai_behaviors():
+	ai_behaviors = AIFactory.get_available_ai_types()
+	print("[CharacterSelection] 已加載 %d 種 AI 類型" % ai_behaviors.size())
+
 ## 設置 AI 行為選擇
 func _setup_ai_selection():
-	for behavior in ai_behaviors:
+	for ai_info in ai_behaviors:
 		var btn = Button.new()
-		match behavior:
-			"random":
-				btn.text = "隨機選擇"
-		
-		btn.custom_minimum_size = Vector2(200, 50)
+		btn.text = "%s\n%s" % [ai_info["name"], ai_info["description"]]
+		btn.custom_minimum_size = Vector2(200, 70)
 		btn.toggle_mode = true
 		
-		if behavior == selected_ai_behavior:
+		if ai_info["id"] == selected_ai_behavior:
 			btn.button_pressed = true
 		
-		btn.connect("pressed", Callable(self, "_on_ai_behavior_selected").bind(behavior))
+		btn.connect("pressed", Callable(self, "_on_ai_behavior_selected").bind(ai_info["id"]))
 		ai_behavior_container.add_child(btn)
 
 ## 角色選擇回調

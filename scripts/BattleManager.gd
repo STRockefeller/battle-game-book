@@ -99,8 +99,10 @@ func _ready():
 	
 	# 設置 AI（player2 是 AI）
 	if not player2_ai:
-		player2_ai = RandomAIBehavior.new()
+		var ai_type = BattleConfig.get_enemy_ai_behavior()
+		player2_ai = AIFactory.create_ai(ai_type)
 		add_child(player2_ai)
+		print("[BattleManager] 已創建 AI: %s" % ai_type)
 
 ## 開始戰鬥
 func start_battle():
@@ -236,8 +238,8 @@ func _execute_single_action(user: Character, target: Character, action: Action):
 		"hit": false,
 		"damage": 0,
 		"actual_damage": 0,
-		"mp_cost": action.cost_mp,
-		"sta_cost": action.stamina_cost,
+		"cost_mp": action.cost_mp,
+		"cost_stamina": action.cost_stamina,
 		"status_applied": null,
 		"stance_changed": false
 	}
@@ -252,21 +254,21 @@ func _execute_single_action(user: Character, target: Character, action: Action):
 		return
 	
 	# 2. 檢查資源成本
-	var sta_cost = action.stamina_cost if action.stamina_cost > 0 else 0
-	var mp_cost = action.cost_mp if action.cost_mp > 0 else 0
+	var cost_stamina = action.cost_stamina if action.cost_stamina > 0 else 0
+	var cost_mp = action.cost_mp if action.cost_mp > 0 else 0
 	var current_sta = get_current_sta(user)
 	var current_mp = get_current_mp(user)
 	
-	print("  [資源檢查] STA: %d/%d (成本%d), MP: %d/%d (成本%d)" % [current_sta, user.max_sta, sta_cost, current_mp, user.max_mp, mp_cost])
+	print("  [資源檢查] STA: %d/%d (成本%d), MP: %d/%d (成本%d)" % [current_sta, user.max_sta, cost_stamina, current_mp, user.max_mp, cost_mp])
 	
-	if current_sta < sta_cost or current_mp < mp_cost:
+	if current_sta < cost_stamina or current_mp < cost_mp:
 		print("  [資源不足] 動作執行失敗 - 返回")
 		action_executed.emit(user, target, action, result)
 		return
 	
 	# 3. 扣除資源
-	set_current_sta(user, current_sta - sta_cost)
-	set_current_mp(user, current_mp - mp_cost)
+	set_current_sta(user, current_sta - cost_stamina)
+	set_current_mp(user, current_mp - cost_mp)
 	print("  [資源扣除] STA: %d→%d, MP: %d→%d" % [current_sta, get_current_sta(user), current_mp, get_current_mp(user)])
 	
 	# 4. 計算命中
@@ -404,18 +406,18 @@ func get_action_state(character: Character, action: Action) -> Dictionary:
 		if cooldowns.has(action.id):
 			cooldown_remaining = int(cooldowns[action.id])
 
-	var sta_cost: int = max(action.stamina_cost, 0)
-	var mp_cost: int = max(action.cost_mp, 0)
+	var cost_stamina: int = max(action.cost_stamina, 0)
+	var cost_mp: int = max(action.cost_mp, 0)
 	var current_sta: int = get_current_sta(character)
 	var current_mp: int = get_current_mp(character)
-	var insufficient: bool = current_sta < sta_cost or current_mp < mp_cost
+	var insufficient: bool = current_sta < cost_stamina or current_mp < cost_mp
 
 	return {
 		"cooldown": cooldown_remaining,
 		"insufficient": insufficient,
 		"disabled": cooldown_remaining > 0 or insufficient,
-		"sta_cost": sta_cost,
-		"mp_cost": mp_cost,
+		"cost_stamina": cost_stamina,
+		"cost_mp": cost_mp,
 		"current_sta": current_sta,
 		"current_mp": current_mp
 	}

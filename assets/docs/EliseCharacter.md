@@ -209,11 +209,11 @@ ID: forest_blessing
 | :--- | :--- |
 | 角色屬性 | `resources/characters/Elise.tres` |
 | 故事數據 | `resources/characters/EliseStory.tres` |
-| 技能1 - 藤蔓鞭打 | `resources/moves/EliseVineLash.tres` |
-| 技能2 - 精靈箭術 | `resources/moves/EliseElvenArrow.tres` |
-| 技能3 - 自然治癒 | `resources/moves/EliseNatureHeal.tres` |
-| 技能4 - 召喚藤蔓 | `resources/moves/EliseSummonVines.tres` |
-| 技能5 - 森林祝福 | `resources/moves/EliseForestBlessing.tres` |
+| 技能1 - 藤蔓鞭打 | `resources/actions/EliseVineLash.tres` |
+| 技能2 - 精靈箭術 | `resources/actions/EliseElvenArrow.tres` |
+| 技能3 - 自然治癒 | `resources/actions/EliseNatureHeal.tres` |
+| 技能4 - 召喚藤蔓 | `resources/actions/EliseSummonVines.tres` |
+| 技能5 - 森林祝福 | `resources/actions/EliseForestBlessing.tres` |
 | 故事邏輯 | `scripts/story/EliseStory.gd` |
 
 ---
@@ -231,11 +231,11 @@ elise.name = "艾莉絲"
 var elise_story = load("res://resources/characters/EliseStory.tres") as EliseStory
 
 # 加載技能
-var vine_lash = load("res://resources/moves/EliseVineLash.tres") as Action
-var elven_arrow = load("res://resources/moves/EliseElvenArrow.tres") as Action
-var nature_heal = load("res://resources/moves/EliseNatureHeal.tres") as Action
-var summon_vines = load("res://resources/moves/EliseSummonVines.tres") as Action
-var forest_blessing = load("res://resources/moves/EliseForestBlessing.tres") as Action
+var vine_lash = load("res://resources/actions/EliseVineLash.tres") as Action
+var elven_arrow = load("res://resources/actions/EliseElvenArrow.tres") as Action
+var nature_heal = load("res://resources/actions/EliseNatureHeal.tres") as Action
+var summon_vines = load("res://resources/actions/EliseSummonVines.tres") as Action
+var forest_blessing = load("res://resources/actions/EliseForestBlessing.tres") as Action
 
 # 設置技能
 elise.available_actions = [vine_lash, elven_arrow, nature_heal, summon_vines, forest_blessing]

@@ -286,7 +286,7 @@ func generate_action_buttons(actions: Array[Action]):
 	# 生成新按鈕
 	for action in actions:
 		var button = Button.new()
-		button.text = "%s (STA: %d)" % [action.name, action.stamina_cost]
+		button.text = "%s (STA: %d)" % [action.name, action.cost_stamina]
 		button.pressed.connect(func(): _on_action_selected(action))
 		moves_container.add_child(button)
 ```
