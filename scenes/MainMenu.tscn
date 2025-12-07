@@ -1,0 +1,115 @@
+[gd_scene load_steps=2 format=3 uid="uid://bxa7dt2n4ys4x"]
+
+[ext_resource type="Script" uid="uid://cbwvknqxvf9u8qj" path="res://scripts/MainMenu.gd" id="1_7yc9d"]
+
+[node name="MainMenu" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_left = 0.0
+anchor_top = 0.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 0.0
+offset_top = 0.0
+offset_right = 0.0
+offset_bottom = 0.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_7yc9d")
+
+[node name="BackgroundColor" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_left = 0.0
+anchor_top = 0.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 0.0
+offset_top = 0.0
+offset_right = 0.0
+offset_bottom = 0.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.15, 0.15, 0.2, 1)
+
+[node name="MainContainer" type="VBoxContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_left = 0.0
+anchor_top = 0.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 0.0
+offset_top = 0.0
+offset_right = 0.0
+offset_bottom = 0.0
+grow_horizontal = 2
+grow_vertical = 2
+alignment = 1
+theme_override_constants/separation = 24
+
+[node name="TitleContainer" type="CenterContainer" parent="MainContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="TitleLabel" type="Label" parent="MainContainer/TitleContainer"]
+layout_mode = 2
+text = "戰鬥遊戲"
+theme_override_font_sizes/font_size = 72
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+
+[node name="SubtitleLabel" type="Label" parent="MainContainer/TitleContainer"]
+layout_mode = 2
+text = "Battle Game Book"
+theme_override_font_sizes/font_size = 24
+theme_override_colors/font_color = Color(0.7, 0.7, 0.7, 1)
+
+[node name="ButtonContainer" type="VBoxContainer" parent="MainContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+alignment = 1
+theme_override_constants/separation = 16
+
+[node name="NewGameButton" type="Button" parent="MainContainer/ButtonContainer"]
+layout_mode = 2
+custom_minimum_size = Vector2(400, 80)
+text = "開始遊戲"
+theme_override_font_sizes/font_size = 28
+
+[node name="TestBattleButton" type="Button" parent="MainContainer/ButtonContainer"]
+layout_mode = 2
+custom_minimum_size = Vector2(400, 80)
+text = "測試對戰"
+theme_override_font_sizes/font_size = 28
+
+[node name="SettingsButton" type="Button" parent="MainContainer/ButtonContainer"]
+layout_mode = 2
+custom_minimum_size = Vector2(400, 80)
+text = "設置"
+theme_override_font_sizes/font_size = 28
+
+[node name="CreditsButton" type="Button" parent="MainContainer/ButtonContainer"]
+layout_mode = 2
+custom_minimum_size = Vector2(400, 80)
+text = "製作人員"
+theme_override_font_sizes/font_size = 28
+
+[node name="ExitButton" type="Button" parent="MainContainer/ButtonContainer"]
+layout_mode = 2
+custom_minimum_size = Vector2(400, 80)
+text = "退出遊戲"
+theme_override_font_sizes/font_size = 28
+
+[node name="VersionLabel" type="Label" parent="MainContainer"]
+layout_mode = 2
+size_flags_vertical = 0
+text = "Version 0.1.0"
+theme_override_font_sizes/font_size = 14
+theme_override_colors/font_color = Color(0.5, 0.5, 0.5, 1)
+
+[connection signal="pressed" from="MainContainer/ButtonContainer/NewGameButton" to="." method="_on_new_game_pressed"]
+[connection signal="pressed" from="MainContainer/ButtonContainer/TestBattleButton" to="." method="_on_test_battle_pressed"]
+[connection signal="pressed" from="MainContainer/ButtonContainer/SettingsButton" to="." method="_on_settings_pressed"]
+[connection signal="pressed" from="MainContainer/ButtonContainer/CreditsButton" to="." method="_on_credits_pressed"]
+[connection signal="pressed" from="MainContainer/ButtonContainer/ExitButton" to="." method="_on_exit_pressed"]

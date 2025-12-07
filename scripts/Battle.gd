@@ -19,6 +19,9 @@ extends Control
 @onready var instruction_label = $MainContainer/BottomContainer/ActionPanel/MarginContainer/VBoxContainer/InstructionLabel
 @onready var moves_container = $MainContainer/BottomContainer/ActionPanel/MarginContainer/VBoxContainer/MovesContainer
 
+# 戰鬥狀態
+var battle_finished: bool = false
+
 func _ready():
 	# 連接 BattleManager 信號
 	battle_manager.connect("turn_start_selection", Callable(self, "_on_turn_start_selection"))
@@ -133,13 +136,19 @@ func _on_turn_ended():
 
 ## 戰鬥結束
 func _on_battle_ended(winner: Character):
+	battle_finished = true
+	
 	# 清空按鈕
 	for child in moves_container.get_children():
 		child.queue_free()
 	
 	if winner:
-		instruction_label.text = "戰鬥結束！勝利者是 %s" % winner.name
+		instruction_label.text = "戰鬥結束！勝利者是 %s！按任意鍵返回主選單..." % winner.name
 		add_log_entry("戰鬥結束！勝利者是 %s！" % winner.name, "gold")
 	else:
-		instruction_label.text = "戰鬥結束！平局"
+		instruction_label.text = "戰鬥結束！平局。按任意鍵返回主選單..."
 		add_log_entry("戰鬥結束！平局", "gold")
+
+func _input(event: InputEvent):
+	if battle_finished and event is InputEventKey and event.pressed:
+		get_tree().change_scene_to_file("res://scenes/MainMenu.tscn")
