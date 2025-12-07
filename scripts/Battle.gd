@@ -88,7 +88,7 @@ func _on_turn_start_selection(player1: Character, player2: Character):
 	
 	for action in available_actions:
 		var btn = Button.new()
-		btn.text = "%s (MP: %d, STA: %d)" % [action.name, action.cost_mp, action.cost_stamina]
+		btn.text = "%s (MP: %d, STA: %d)" % [action.name, action.cost_mp, action.stamina_cost]
 		btn.connect("pressed", Callable(self, "_on_action_selected").bind(action))
 		moves_container.add_child(btn)
 	
