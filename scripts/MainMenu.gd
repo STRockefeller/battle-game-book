@@ -8,8 +8,8 @@ func _on_new_game_pressed():
 	print("開始遊戲 - 功能待實現")
 
 func _on_test_battle_pressed():
-	# 加載並切換到戰鬥場景
-	get_tree().change_scene_to_file("res://scenes/BattleUI.tscn")
+	# 切換到角色選擇場景
+	get_tree().change_scene_to_file("res://scenes/CharacterSelection.tscn")
 
 func _on_settings_pressed():
 	print("設置 - 功能待實現")

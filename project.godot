@@ -14,3 +14,7 @@ config/name="BattleGameBook"
 config/features=PackedStringArray("4.5", "Forward Plus")
 config/icon="res://icon.svg"
 run/main_scene="res://scenes/MainMenu.tscn"
+
+[autoload]
+
+BattleConfig="*res://scripts/BattleConfig.gd"

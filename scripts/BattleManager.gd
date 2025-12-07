@@ -48,16 +48,22 @@ var max_turns: int = 100  # 防止無限迴圈
 # ==================== 初始化 ====================
 
 func _ready():
-	# 初始化玩家（複製資源以避免共享狀態）
-	if not player1:
-		var hero_template = load("res://resources/characters/Elise.tres")
-		if hero_template:
-			player1 = hero_template.duplicate()
-	
-	if not player2:
-		var hero_template = load("res://resources/characters/Elise.tres")
-		if hero_template:
-			player2 = hero_template.duplicate()
+	# 檢查是否有來自 CharacterSelection 的配置
+	if BattleConfig.player_character and BattleConfig.enemy_character:
+		player1 = BattleConfig.player_character
+		player2 = BattleConfig.enemy_character
+		BattleConfig.clear_config()
+	else:
+		# 後備方案：使用預設角色
+		if not player1:
+			var hero_template = load("res://resources/characters/Elise.tres")
+			if hero_template:
+				player1 = hero_template.duplicate()
+		
+		if not player2:
+			var hero_template = load("res://resources/characters/Elise.tres")
+			if hero_template:
+				player2 = hero_template.duplicate()
 	
 	characters = [player1, player2]
 	

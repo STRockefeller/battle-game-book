@@ -1,0 +1,122 @@
+[gd_scene load_steps=2 format=3 uid="uid://bbm0toprnnvvc"]
+
+[ext_resource type="Script" uid="uid://c0kmxvwd0k3n5m8" path="res://scripts/CharacterSelection.gd" id="1_abc8d"]
+
+[node name="CharacterSelection" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_left = 0.0
+anchor_top = 0.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 0.0
+offset_top = 0.0
+offset_right = 0.0
+offset_bottom = 0.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_abc8d")
+
+[node name="BackgroundColor" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_left = 0.0
+anchor_top = 0.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 0.0
+offset_top = 0.0
+offset_right = 0.0
+offset_bottom = 0.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.15, 0.15, 0.2, 1)
+
+[node name="MainContainer" type="HBoxContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_left = 0.0
+anchor_top = 0.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 0.0
+offset_top = 0.0
+offset_right = 0.0
+offset_bottom = 0.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 32
+
+[node name="LeftPanel" type="VBoxContainer" parent="MainContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 16
+
+[node name="LeftTitle" type="Label" parent="MainContainer/LeftPanel"]
+layout_mode = 2
+size_flags_vertical = 0
+text = "玩家角色"
+theme_override_font_sizes/font_size = 32
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+
+[node name="LeftCharacterContainer" type="VBoxContainer" parent="MainContainer/LeftPanel"]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_constants/separation = 12
+
+[node name="CenterPanel" type="VBoxContainer" parent="MainContainer"]
+layout_mode = 2
+size_flags_horizontal = 0
+alignment = 1
+theme_override_constants/separation = 24
+
+[node name="ConfirmButton" type="Button" parent="MainContainer/CenterPanel"]
+layout_mode = 2
+custom_minimum_size = Vector2(120, 60)
+text = "開始\n對戰"
+theme_override_font_sizes/font_size = 20
+
+[node name="BackButton" type="Button" parent="MainContainer/CenterPanel"]
+layout_mode = 2
+custom_minimum_size = Vector2(120, 60)
+text = "返回"
+theme_override_font_sizes/font_size = 20
+
+[node name="RightPanel" type="VBoxContainer" parent="MainContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 16
+
+[node name="RightTitle" type="Label" parent="MainContainer/RightPanel"]
+layout_mode = 2
+size_flags_vertical = 0
+text = "對手設置"
+theme_override_font_sizes/font_size = 32
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+
+[node name="AIBehaviorLabel" type="Label" parent="MainContainer/RightPanel"]
+layout_mode = 2
+size_flags_vertical = 0
+text = "AI 行為"
+theme_override_font_sizes/font_size = 20
+theme_override_colors/font_color = Color(0.8, 0.8, 0.8, 1)
+
+[node name="AIBehaviorContainer" type="VBoxContainer" parent="MainContainer/RightPanel"]
+layout_mode = 2
+size_flags_vertical = 0
+theme_override_constants/separation = 8
+
+[node name="EnemyCharacterLabel" type="Label" parent="MainContainer/RightPanel"]
+layout_mode = 2
+size_flags_vertical = 0
+text = "對手角色"
+theme_override_font_sizes/font_size = 20
+theme_override_colors/font_color = Color(0.8, 0.8, 0.8, 1)
+
+[node name="RightCharacterContainer" type="VBoxContainer" parent="MainContainer/RightPanel"]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_constants/separation = 12
+
+[connection signal="pressed" from="MainContainer/CenterPanel/ConfirmButton" to="." method="_on_confirm_pressed"]
+[connection signal="pressed" from="MainContainer/CenterPanel/BackButton" to="." method="_on_back_pressed"]
