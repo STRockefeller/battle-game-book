@@ -28,11 +28,9 @@ func change_stance(new_type: Stance.Type, duration: int = -1) -> void:
 	# 建立新的姿態實例
 	current_stance = Stance.new(new_type, duration)
 	
-	print("%s 的姿態改變: %s → %s" % [
-		character.name,
-		Stance.get_name(old_stance_type),
-		Stance.get_name(new_type)
-	])
+	var old_name = _get_stance_name(old_stance_type)
+	var new_name = _get_stance_name(new_type)
+	print("%s 的姿態改變: %s → %s" % [character.name, old_name, new_name])
 	
 	# 發出信號
 	stance_changed.emit(old_stance_type, new_type)
@@ -49,11 +47,31 @@ func get_current_stance_type() -> Stance.Type:
 
 ## 獲取當前姿態名稱
 func get_current_stance_name() -> String:
-	return Stance.get_name(current_stance.type)
+	match current_stance.type:
+		Stance.Type.STANDING:
+			return "站立"
+		Stance.Type.KNOCKED_DOWN:
+			return "倒地"
+		Stance.Type.AIRBORNE:
+			return "滯空"
+		Stance.Type.GUARDING:
+			return "防禦"
+		_:
+			return "未知"
 
 ## 獲取當前姿態描述
 func get_current_stance_description() -> String:
-	return Stance.get_description(current_stance.type)
+	match current_stance.type:
+		Stance.Type.STANDING:
+			return "正常狀態，可以執行所有基礎動作"
+		Stance.Type.KNOCKED_DOWN:
+			return "被擊倒在地，只能選擇「起身」動作"
+		Stance.Type.AIRBORNE:
+			return "懸浮在空中，只能執行空中動作"
+		Stance.Type.GUARDING:
+			return "防禦姿態，防禦力大幅提升但無法攻擊"
+		_:
+			return ""
 
 ## 獲取當前姿態持續時間
 func get_remaining_duration() -> int:
@@ -61,7 +79,17 @@ func get_remaining_duration() -> int:
 
 ## 檢查角色是否可以執行特定動作
 func can_perform_action(action_tag: String) -> bool:
-	return Stance.can_perform_action(current_stance.type, action_tag)
+	match current_stance.type:
+		Stance.Type.STANDING:
+			return true
+		Stance.Type.KNOCKED_DOWN:
+			return action_tag == "stand_up"
+		Stance.Type.AIRBORNE:
+			return action_tag in ["aerial_attack", "aerial_skill"]
+		Stance.Type.GUARDING:
+			return action_tag in ["guard", "counter_guard"]
+		_:
+			return false
 
 ## 檢查角色是否處於特定姿態
 func is_stance(stance_type: Stance.Type) -> bool:
@@ -104,10 +132,8 @@ func on_turn_end() -> void:
 	
 	# 如果姿態已過期，恢復到站立
 	if current_stance.is_expired():
-		print("%s 的「%s」狀態已結束，恢復站立" % [
-			character.name,
-			Stance.get_name(current_stance.type)
-		])
+		var stance_name = _get_stance_name(current_stance.type)
+		print("%s 的「%s」狀態已結束，恢復站立" % [character.name, stance_name])
 		reset_to_standing()
 
 # ==================== 姿態特殊效果 ====================
@@ -124,3 +150,18 @@ func affects_action_execution() -> bool:
 		Stance.Type.KNOCKED_DOWN,
 		Stance.Type.GUARDING
 	]
+
+# ==================== 輔助方法 ====================
+
+func _get_stance_name(stance_type: Stance.Type) -> String:
+	match stance_type:
+		Stance.Type.STANDING:
+			return "站立"
+		Stance.Type.KNOCKED_DOWN:
+			return "倒地"
+		Stance.Type.AIRBORNE:
+			return "滯空"
+		Stance.Type.GUARDING:
+			return "防禦"
+		_:
+			return "未知"

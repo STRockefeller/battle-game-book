@@ -5,6 +5,9 @@
 extends Node
 class_name StatusEffectHandlers
 
+# 需要引用 BattleManager 來修改實際的 HP 值
+static var battle_manager: BattleManager = null
+
 # ==================== 主要入口 ====================
 
 ## 根據效果類型觸發相應的處理函數。
@@ -27,14 +30,20 @@ static func trigger_effect(character: Character, effect: StatusEffect) -> void:
 
 ## 中毒 - 每回合造成傷害
 static func _trigger_poison(character: Character, effect: StatusEffect) -> void:
+	if not battle_manager:
+		return
 	var damage = effect.effect_parameters.get("damage_per_turn", 1) as int
-	character.take_damage(damage)
+	var current_hp = battle_manager.get_current_hp(character)
+	battle_manager.set_current_hp(character, current_hp - damage)
 	print("%s 受到中毒傷害: %d HP" % [character.name, damage])
 
 ## 燃燒 - 每回合造成傷害
 static func _trigger_burning(character: Character, effect: StatusEffect) -> void:
+	if not battle_manager:
+		return
 	var damage = effect.effect_parameters.get("damage_per_turn", 2) as int
-	character.take_damage(damage)
+	var current_hp = battle_manager.get_current_hp(character)
+	battle_manager.set_current_hp(character, current_hp - damage)
 	print("%s 被燃燒傷害: %d HP" % [character.name, damage])
 
 ## 虛弱 - 純屬性修正，不需要特殊觸發邏輯
@@ -50,8 +59,11 @@ static func _trigger_stun(character: Character, effect: StatusEffect) -> void:
 
 ## 再生 - 每回合恢復生命值
 static func _trigger_regen(character: Character, effect: StatusEffect) -> void:
+	if not battle_manager:
+		return
 	var recovery = effect.effect_parameters.get("recovery_per_turn", 5) as int
-	character.heal(recovery)
+	var current_hp = battle_manager.get_current_hp(character)
+	battle_manager.set_current_hp(character, current_hp + recovery)
 	print("%s 恢復生命值: %d HP" % [character.name, recovery])
 
 # ==================== 輔助函數 ====================

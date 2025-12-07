@@ -64,16 +64,8 @@ func update_character_status(character: Character, is_player1: bool):
 	
 	# 從 stance_manager 取得當前姿態
 	var stance_name = "站立"  # 預設值
-	if character.stance_manager and character.stance_manager.current_stance:
-		match character.stance_manager.current_stance.type:
-			Stance.Type.STANDING:
-				stance_name = "站立"
-			Stance.Type.KNOCKED_DOWN:
-				stance_name = "倒地"
-			Stance.Type.AIRBORNE:
-				stance_name = "滯空"
-			Stance.Type.GUARDING:
-				stance_name = "防禦"
+	if character.stance_manager:
+		stance_name = character.stance_manager.get_current_stance_name()
 	
 	stance_label.text = "姿態: %s" % stance_name
 

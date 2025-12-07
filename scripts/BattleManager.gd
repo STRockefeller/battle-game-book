@@ -94,6 +94,9 @@ func _ready():
 	print("  Player1: %s - HP=%d, MP=%d, STA=%d (max_sta=%d)" % [player1.name, get_current_hp(player1), get_current_mp(player1), get_current_sta(player1), player1.max_sta])
 	print("  Player2: %s - HP=%d, MP=%d, STA=%d (max_sta=%d)" % [player2.name, get_current_hp(player2), get_current_mp(player2), get_current_sta(player2), player2.max_sta])
 	
+	# 設置 StatusEffectHandlers 的 battle_manager 引用
+	StatusEffectHandlers.battle_manager = self
+	
 	# 設置 AI（player2 是 AI）
 	if not player2_ai:
 		player2_ai = RandomAIBehavior.new()
@@ -294,15 +297,38 @@ func _execute_single_action(user: Character, target: Character, action: Action):
 		
 		# 6. 應用狀態效果
 		if action.effects_on_hit.size() > 0:
-			# TODO: 從 effects_on_hit ID 加載狀態效果資源並應用
-			result["status_applied"] = action.effects_on_hit[0] if action.effects_on_hit.size() > 0 else null
+			for effect_id in action.effects_on_hit:
+				var effect_resource = load("res://resources/statuses/%s.tres" % effect_id.capitalize())
+				if effect_resource:
+					target.apply_effect(effect_resource)
+					result["status_applied"] = effect_id
+					print("  [狀態效果] 對 %s 施加了 %s" % [target.name, effect_id])
+				else:
+					print("  [警告] 無法加載狀態效果: %s" % effect_id)
 		
 		# 7. 改變姿態
 		if action.target_stance_change_to != "":
-			# TODO: 根據 target_stance_change_to 字符串確定姿態類型
-			result["stance_changed"] = true
+			var stance_type = _parse_stance_type(action.target_stance_change_to)
+			if stance_type != null:
+				target.change_stance(stance_type, -1)
+				result["stance_changed"] = true
+				print("  [姿態變更] %s 變更為 %s" % [target.name, action.target_stance_change_to])
 	
-	# 8. 設置冷卻
+	# 8. 使用者姿態變更（用於起身等自身動作）
+	if action.user_stance_change_to != "":
+		var stance_type = _parse_stance_type(action.user_stance_change_to)
+		if stance_type != null:
+			user.change_stance(stance_type, -1)
+			result["stance_changed"] = true
+			print("  [姿態變更] %s 變更為 %s" % [user.name, action.user_stance_change_to])
+	
+	# 9. 特殊動作效果（如恢復體力）
+	if "rest" in action.tags:
+		var sta_restore = 20
+		set_current_sta(user, get_current_sta(user) + sta_restore)
+		print("  [恢復體力] %s 恢復了 %d 體力" % [user.name, sta_restore])
+	
+	# 10. 設置冷卻
 	if action.cooldown > 0:
 		cooldowns[action.id] = action.cooldown
 	
@@ -351,9 +377,20 @@ func _check_battle_end() -> bool:
 ## 獲取角色的可用動作列表
 func _get_available_actions(character: Character) -> Array[Action]:
 	var available: Array[Action] = []
+	var current_stance = character.stance_manager.get_current_stance_type()
 	
-	# 檢查姿態限制
+	# 如果角色處於倒地狀態，只能使用起身動作
+	if current_stance == Stance.Type.KNOCKED_DOWN:
+		for action in character.available_actions:
+			if "stand_up" in action.tags:
+				available.append(action)
+		return available
+	
+	# 正常情況下檢查姿態限制
 	for action in character.available_actions:
+		# 倒地專用動作不應在正常狀態下顯示
+		if "stand_up" in action.tags:
+			continue
 		if character.can_perform_action(action.tags[0] if action.tags.size() > 0 else ""):
 			available.append(action)
 	
@@ -420,3 +457,20 @@ func get_current_sta(character: Character) -> int:
 ## 設置角色當前 STA
 func set_current_sta(character: Character, value: int) -> void:
 	character_current_sta[character] = clamp(value, 0, character.max_sta)
+
+# ==================== 輔助方法 ====================
+
+## 將字符串轉換為姿態類型
+func _parse_stance_type(stance_str: String) -> Variant:
+	match stance_str.to_lower():
+		"standing":
+			return Stance.Type.STANDING
+		"knocked_down", "knockdown":
+			return Stance.Type.KNOCKED_DOWN
+		"airborne":
+			return Stance.Type.AIRBORNE
+		"guarding", "guard":
+			return Stance.Type.GUARDING
+		_:
+			print("  [警告] 無法解析姿態類型: %s" % stance_str)
+			return null
