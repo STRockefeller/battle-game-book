@@ -139,7 +139,7 @@ func on_turn_end() -> void:
 # ==================== 姿態特殊效果 ====================
 
 ## 在角色受到傷害時調用，返回是否應該被倒地
-func on_take_damage(damage: int) -> bool:
+func on_take_damage(_damage: int) -> bool:
 	# 倒地的觸發邏輯可以在這裡實現
 	# 例如：超過一定傷害值時倒地
 	return false

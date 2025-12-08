@@ -85,7 +85,7 @@ func add_log_entry(message: String, color: String = "white"):
 	var formatted_message = "[color=%s]%s[/color]" % [color, message]
 	log_content.append_text(formatted_message + "\n")
 
-func _on_turn_start_selection(player1: Character, player2: Character):
+func _on_turn_start_selection(player1: Character, _player2: Character):
 	update_all_status()
 	
 	# 清空之前的行動按鈕
@@ -131,7 +131,7 @@ func _on_all_actions_selected():
 	add_log_entry("所有選擇完成，動作執行中...", SYSTEM_COLOR)
 
 ## 動作執行
-func _on_action_executed(user: Character, target: Character, action: Action, result: Dictionary):
+func _on_action_executed(user: Character, _target: Character, action: Action, result: Dictionary):
 	var log_message = "%s 使用了 %s" % [user.name, action.name]
 	var color = _color_for_character(user)
 	

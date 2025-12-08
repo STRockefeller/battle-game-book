@@ -66,7 +66,7 @@ static func is_valid_ai_type(ai_type: String) -> bool:
 
 ## 從資源創建 AI（預留接口）
 ## 目前返回 null，未來可以加載 .tres 資源
-static func create_ai_from_resource(resource_path: String) -> AIBehavior:
+static func create_ai_from_resource(_resource_path: String) -> AIBehavior:
 	# 預留給未來資源化使用
 	# var resource = load(resource_path) as AIBehaviorResource
 	# if resource:

@@ -3,7 +3,7 @@
 extends AIBehavior
 class_name RandomAI
 
-func choose_action(character: Character, available_actions: Array, opponent: Character, battle_manager: BattleManager) -> Action:
+func choose_action(character: Character, available_actions: Array, _opponent: Character, battle_manager: BattleManager) -> Action:
 	if available_actions.size() == 0:
 		return null
 	

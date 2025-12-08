@@ -47,12 +47,12 @@ static func _trigger_burning(character: Character, effect: StatusEffect) -> void
 	print("%s 被燃燒傷害: %d HP" % [character.name, damage])
 
 ## 虛弱 - 純屬性修正，不需要特殊觸發邏輯
-static func _trigger_weakness(character: Character, effect: StatusEffect) -> void:
+static func _trigger_weakness(character: Character, _effect: StatusEffect) -> void:
 	# 虛弱只通過 stat_modifiers 修正屬性，不需要回合觸發邏輯
 	print("%s 處於虛弱狀態" % character.name)
 
 ## 眩暈 - 導致角色無法行動
-static func _trigger_stun(character: Character, effect: StatusEffect) -> void:
+static func _trigger_stun(character: Character, _effect: StatusEffect) -> void:
 	# 這裡可能需要與戰鬥系統整合
 	# 例如：禁止角色在本回合選擇動作
 	print("%s 被眩暈，無法行動" % character.name)
@@ -69,13 +69,13 @@ static func _trigger_regen(character: Character, effect: StatusEffect) -> void:
 # ==================== 輔助函數 ====================
 
 ## 檢查效果的特殊條件（可選）
-static func check_condition(character: Character, effect: StatusEffect) -> bool:
+static func check_condition(_character: Character, _effect: StatusEffect) -> bool:
 	# 在這裡可以添加條件判定邏輯
 	# 例如：某個效果可能對已經中毒的角色失效
 	return true
 
 ## 應用效果的附加邏輯
-static func apply_on_hit(attacker: Character, defender: Character, effect: StatusEffect) -> void:
+static func apply_on_hit(_attacker: Character, _defender: Character, _effect: StatusEffect) -> void:
 	# 當效果在攻擊命中時觸發時使用
 	# 例如：獲得狀態的概率判定
 	pass

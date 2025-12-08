@@ -17,7 +17,7 @@ func configure(resource: Resource) -> void:
 
 ## AI 選擇動作的主要方法（子類必須實現）
 ## 返回值：選定的 Action，或 null 如果無法選擇
-func choose_action(character: Character, available_actions: Array, opponent: Character, battle_manager: BattleManager) -> Action:
+func choose_action(_character: Character, _available_actions: Array, _opponent: Character, _battle_manager: BattleManager) -> Action:
 	push_error("choose_action() 未在 %s 中實現" % get_class())
 	return null
 
@@ -25,7 +25,7 @@ func choose_action(character: Character, available_actions: Array, opponent: Cha
 
 ## 評估單個動作的優先級（子類可重寫）
 ## 返回值越高表示優先級越高
-func evaluate_action(action: Action, character: Character, opponent: Character, battle_manager: BattleManager) -> float:
+func evaluate_action(_action: Action, _character: Character, _opponent: Character, _battle_manager: BattleManager) -> float:
 	return 0.0
 
 ## 獲取角色當前血量比例 (0.0 - 1.0)

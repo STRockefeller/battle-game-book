@@ -4,8 +4,8 @@ extends AIBehavior
 class_name BalancedAI
 
 # 狀態閾值
-const AGGRESSIVE_HP_THRESHOLD = 0.6  # 高於此值時偏攻擊
-const DEFENSIVE_HP_THRESHOLD = 0.3   # 低於此值時偏防守
+const AGGRESSIVE_HP_THRESHOLD = 0.6 # 高於此值時偏攻擊
+const DEFENSIVE_HP_THRESHOLD = 0.3 # 低於此值時偏防守
 const LOW_STA_THRESHOLD = 0.25
 
 func choose_action(character: Character, available_actions: Array, opponent: Character, battle_manager: BattleManager) -> Action:
@@ -54,7 +54,7 @@ func choose_action(character: Character, available_actions: Array, opponent: Cha
 	return best_action
 
 ## 根據當前狀況決定策略
-func _determine_strategy(hp_ratio: float, sta_ratio: float, opponent_hp_ratio: float) -> String:
+func _determine_strategy(hp_ratio: float, _sta_ratio: float, opponent_hp_ratio: float) -> String:
 	# 緊急狀態：血量極低
 	if hp_ratio < 0.15:
 		return "emergency"
@@ -136,7 +136,7 @@ func _evaluate_status_effects(action: Action) -> float:
 	return score
 
 ## 應用攻擊型修正
-func _apply_aggressive_modifiers(base_score: float, action: Action, character: Character, opponent: Character, battle_manager: BattleManager) -> float:
+func _apply_aggressive_modifiers(base_score: float, action: Action, _character: Character, _opponent: Character, _battle_manager: BattleManager) -> float:
 	var score = base_score
 	
 	# 高傷害加成
@@ -156,7 +156,7 @@ func _apply_aggressive_modifiers(base_score: float, action: Action, character: C
 	return score
 
 ## 應用防守型修正
-func _apply_defensive_modifiers(base_score: float, action: Action, character: Character, opponent: Character, battle_manager: BattleManager) -> float:
+func _apply_defensive_modifiers(base_score: float, action: Action, _character: Character, _opponent: Character, _battle_manager: BattleManager) -> float:
 	var score = base_score
 	
 	# 防禦動作大幅加成
@@ -178,7 +178,7 @@ func _apply_defensive_modifiers(base_score: float, action: Action, character: Ch
 	return score
 
 ## 應用平衡型修正
-func _apply_balanced_modifiers(base_score: float, action: Action, character: Character, opponent: Character, battle_manager: BattleManager) -> float:
+func _apply_balanced_modifiers(base_score: float, action: Action, _character: Character, _opponent: Character, _battle_manager: BattleManager) -> float:
 	var score = base_score
 	
 	# 中等傷害動作加成
@@ -199,7 +199,7 @@ func _apply_balanced_modifiers(base_score: float, action: Action, character: Cha
 	return score
 
 ## 應用緊急狀況修正
-func _apply_emergency_modifiers(base_score: float, action: Action, character: Character, opponent: Character, battle_manager: BattleManager) -> float:
+func _apply_emergency_modifiers(base_score: float, action: Action, _character: Character, _opponent: Character, _battle_manager: BattleManager) -> float:
 	var score = base_score
 	
 	# 只關注生存
