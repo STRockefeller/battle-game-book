@@ -1,7 +1,13 @@
 # BattleManager.gd
-# 完整的對戰系統 - 同時行動制、回合循環、AI 支持
+# 基礎對戰管理器 - 支援單機和多人模式
+# 單機模式：直接使用此類加上 AI
+# 多人模式：將此類作為基類，由子類實現伺服器/客戶端邏輯
 extends Node
 class_name BattleManager
+
+const MODE_SINGLEPLAYER = "singleplayer"
+const MODE_SERVER = "server"
+const MODE_CLIENT = "client"
 
 # ==================== 信號定義 ====================
 
@@ -20,6 +26,11 @@ signal turn_ended()
 ## 戰鬥結束時發送
 signal battle_ended(winner: Character)
 
+# ==================== 對戰模式 ====================
+
+var battle_mode: String = MODE_SINGLEPLAYER
+var state: Variant  # BattleState，使用 Variant 避免前置聲明問題
+
 # ==================== 角色和狀態 ====================
 
 var player1: Character
@@ -30,16 +41,8 @@ var characters: Array[Character] = []
 var player1_ai: AIBehavior
 var player2_ai: AIBehavior
 
-# 冷卻時間追蹤
-var action_cooldowns: Dictionary[Character, Dictionary] = {}  # character -> {action_id -> remaining_cooldown}
-
-# 當前戰鬥的暫時值（由 BattleManager 管理）
-var character_current_hp: Dictionary = {}  # character -> current_hp
-var character_current_mp: Dictionary = {}  # character -> current_mp
-var character_current_sta: Dictionary = {}  # character -> current_sta
-
 # 當前回合的選擇
-var pending_selections: Dictionary[Character, Action] = {}  # character -> Action
+var pending_selections: Dictionary[Character, Action] = {}
 var selections_completed: int = 0
 
 # 當前距離（用於距離相關的計算）
@@ -47,8 +50,6 @@ var current_distance: String = "mid"
 
 # 是否等待玩家輸入
 var waiting_for_input: bool = false
-var current_turn: int = 0
-var max_turns: int = 100  # 防止無限迴圈
 
 # ==================== 初始化 ====================
 
@@ -72,52 +73,48 @@ func _ready():
 	
 	characters = [player1, player2]
 	
-	# 初始化冷卻追蹤
-	action_cooldowns[player1] = {} as Dictionary
-	action_cooldowns[player2] = {} as Dictionary
-	
 	# 確保所有角色的計算屬性已更新
 	for character in characters:
 		if character:
 			character.calculate_base_stats()
 	
-	# 初始化暫時值
-	character_current_hp[player1] = player1.max_hp
-	character_current_hp[player2] = player2.max_hp
-	character_current_mp[player1] = player1.max_mp
-	character_current_mp[player2] = player2.max_mp
-	character_current_sta[player1] = player1.max_sta
-	character_current_sta[player2] = player2.max_sta
+	# 初始化戰鬥狀態
+	var BattleStateClass = load("res://scripts/BattleState.gd")
+	state = BattleStateClass.new(
+		player1.max_hp, player1.max_mp, player1.max_sta,
+		player2.max_hp, player2.max_mp, player2.max_sta
+	)
 	
 	# 驗證初始化
-	print("[BattleManager] 戰鬥初始化完成")
-	print("  Player1: %s - HP=%d, MP=%d, STA=%d (max_sta=%d)" % [player1.name, get_current_hp(player1), get_current_mp(player1), get_current_sta(player1), player1.max_sta])
-	print("  Player2: %s - HP=%d, MP=%d, STA=%d (max_sta=%d)" % [player2.name, get_current_hp(player2), get_current_mp(player2), get_current_sta(player2), player2.max_sta])
+	print("[BattleManager] 戰鬥初始化完成 (模式: %s)" % battle_mode)
+	print("  Player1: %s - HP=%d, MP=%d, STA=%d" % [player1.name, get_current_hp(player1), get_current_mp(player1), get_current_sta(player1)])
+	print("  Player2: %s - HP=%d, MP=%d, STA=%d" % [player2.name, get_current_hp(player2), get_current_mp(player2), get_current_sta(player2)])
 	
 	# 設置 StatusEffectHandlers 的 battle_manager 引用
 	StatusEffectHandlers.battle_manager = self
 	
-	# 設置 AI（player2 是 AI）
-	if not player2_ai:
-		var ai_type = BattleConfig.get_enemy_ai_behavior()
-		player2_ai = AIFactory.create_ai(ai_type)
-		add_child(player2_ai)
-		print("[BattleManager] 已創建 AI: %s" % ai_type)
+	# 設置 AI（player2 是 AI，單機模式下）
+	if battle_mode == MODE_SINGLEPLAYER:
+		if not player2_ai:
+			var ai_type = BattleConfig.get_enemy_ai_behavior()
+			player2_ai = AIFactory.create_ai(ai_type)
+			add_child(player2_ai)
+			print("[BattleManager] 已創建 AI: %s" % ai_type)
 
 ## 開始戰鬥
 func start_battle():
-	current_turn = 0
-	max_turns = 100
+	state.turn = 0
 	begin_round()
 
 ## 開始新的回合
 func begin_round():
-	if current_turn >= max_turns:
+	if state.turn >= state.max_turns:
 		# 達到最大回合數 - 平局
 		battle_ended.emit(null)
 		return
 	
-	current_turn += 1
+	state.turn += 1
+	print("[BattleManager] === 第 %d 回合開始 ===" % state.turn)
 	
 	# ========== 第 1 階段：回合開始 ==========
 	_turn_start_phase()
@@ -140,8 +137,9 @@ func _action_selection_phase():
 	# 發送信號，請求選擇
 	turn_start_selection.emit(player1, player2)
 	
-	# AI 立即做決策
-	_ai_select_action()
+	# AI 立即做決策（單機模式）
+	if battle_mode == MODE_SINGLEPLAYER:
+		_ai_select_action()
 
 ## 玩家選擇動作
 func player_select_action(action: Action):
@@ -232,7 +230,7 @@ func _calculate_execution_order() -> Array[Dictionary]:
 	
 	return order
 
-## 執行單個動作
+## 執行單個動作 - 核心邏輯，被子類重寫以支援網路同步
 func _execute_single_action(user: Character, target: Character, action: Action):
 	var result = {
 		"hit": false,
@@ -247,8 +245,8 @@ func _execute_single_action(user: Character, target: Character, action: Action):
 	print("[_execute_single_action] %s 使用 %s | 檢查資源成本" % [user.name, action.name])
 	
 	# 1. 檢查冷卻
-	var cooldowns = action_cooldowns[user]
-	if cooldowns.has(action.id):
+	var cooldowns = _get_player_cooldowns(user)
+	if cooldowns.has(action.id) and cooldowns[action.id] > 0:
 		print("  [冷卻中] 冷卻剩餘: %d" % cooldowns[action.id])
 		action_executed.emit(user, target, action, result)
 		return
@@ -267,8 +265,10 @@ func _execute_single_action(user: Character, target: Character, action: Action):
 		return
 	
 	# 3. 扣除資源
-	set_current_sta(user, current_sta - cost_stamina)
-	set_current_mp(user, current_mp - cost_mp)
+	var new_sta = current_sta - cost_stamina
+	var new_mp = current_mp - cost_mp
+	set_current_sta(user, new_sta)
+	set_current_mp(user, new_mp)
 	print("  [資源扣除] STA: %d→%d, MP: %d→%d" % [current_sta, get_current_sta(user), current_mp, get_current_mp(user)])
 	
 	# 4. 計算命中
@@ -314,6 +314,7 @@ func _execute_single_action(user: Character, target: Character, action: Action):
 			if stance_type != null:
 				target.change_stance(stance_type, -1)
 				result["stance_changed"] = true
+				_update_player_stance(target, stance_type)
 				print("  [姿態變更] %s 變更為 %s" % [target.name, action.target_stance_change_to])
 	
 	# 8. 使用者姿態變更（用於起身等自身動作）
@@ -322,6 +323,7 @@ func _execute_single_action(user: Character, target: Character, action: Action):
 		if stance_type != null:
 			user.change_stance(stance_type, -1)
 			result["stance_changed"] = true
+			_update_player_stance(user, stance_type)
 			print("  [姿態變更] %s 變更為 %s" % [user.name, action.user_stance_change_to])
 	
 	# 9. 特殊動作效果（如恢復體力）
@@ -332,7 +334,9 @@ func _execute_single_action(user: Character, target: Character, action: Action):
 	
 	# 10. 設置冷卻
 	if action.cooldown > 0:
-		cooldowns[action.id] = action.cooldown
+		var updated_cooldowns = _get_player_cooldowns(user).duplicate()
+		updated_cooldowns[action.id] = action.cooldown
+		_set_player_cooldowns(user, updated_cooldowns)
 	
 	# 發送信號
 	action_executed.emit(user, target, action, result)
@@ -345,16 +349,29 @@ func _turn_end_phase():
 			character.on_turn_end()
 	
 	# 減少所有冷卻
-	for character in characters:
-		if action_cooldowns.has(character):
-			var cooldowns = action_cooldowns[character]
-			var to_remove = []
-			for action_id in cooldowns:
-				cooldowns[action_id] -= 1
-				if cooldowns[action_id] <= 0:
-					to_remove.append(action_id)
-			for action_id in to_remove:
-				cooldowns.erase(action_id)
+	var p1_cooldowns = _get_player_cooldowns(player1).duplicate()
+	var p2_cooldowns = _get_player_cooldowns(player2).duplicate()
+	
+	# 減少 P1 冷卻
+	var p1_to_remove = []
+	for action_id in p1_cooldowns:
+		p1_cooldowns[action_id] -= 1
+		if p1_cooldowns[action_id] <= 0:
+			p1_to_remove.append(action_id)
+	for action_id in p1_to_remove:
+		p1_cooldowns.erase(action_id)
+	
+	# 減少 P2 冷卻
+	var p2_to_remove = []
+	for action_id in p2_cooldowns:
+		p2_cooldowns[action_id] -= 1
+		if p2_cooldowns[action_id] <= 0:
+			p2_to_remove.append(action_id)
+	for action_id in p2_to_remove:
+		p2_cooldowns.erase(action_id)
+	
+	_set_player_cooldowns(player1, p1_cooldowns)
+	_set_player_cooldowns(player2, p2_cooldowns)
 	
 	turn_ended.emit()
 	
@@ -400,11 +417,10 @@ func _get_available_actions(character: Character) -> Array[Action]:
 
 ## 取得動作狀態（UI 用來顯示可用性）
 func get_action_state(character: Character, action: Action) -> Dictionary:
+	var cooldowns = _get_player_cooldowns(character)
 	var cooldown_remaining: int = 0
-	if action_cooldowns.has(character):
-		var cooldowns: Dictionary = action_cooldowns[character]
-		if cooldowns.has(action.id):
-			cooldown_remaining = int(cooldowns[action.id])
+	if cooldowns.has(action.id):
+		cooldown_remaining = int(cooldowns[action.id])
 
 	var cost_stamina: int = max(action.cost_stamina, 0)
 	var cost_mp: int = max(action.cost_mp, 0)
@@ -428,37 +444,55 @@ func _roll_hit(accuracy: float, evasion: float) -> bool:
 	hit_chance = clamp(hit_chance, 5, 95)  # 保證至少有 5% 命中和迴避機率
 	return randf() * 100 < hit_chance
 
-# ==================== 暫時值管理方法 ====================
+# ==================== 狀態管理方法 ====================
 
 ## 獲取角色當前 HP
 func get_current_hp(character: Character) -> int:
-	if character_current_hp.has(character):
-		return character_current_hp[character]
-	return character.max_hp
+	if character == player1:
+		return state.p1_current_hp
+	else:
+		return state.p2_current_hp
 
 ## 設置角色當前 HP
 func set_current_hp(character: Character, value: int) -> void:
-	character_current_hp[character] = clamp(value, 0, character.max_hp)
+	var max_hp = character.max_hp
+	var clamped = clamp(value, 0, max_hp)
+	if character == player1:
+		state.p1_current_hp = clamped
+	else:
+		state.p2_current_hp = clamped
 
 ## 獲取角色當前 MP
 func get_current_mp(character: Character) -> int:
-	if character_current_mp.has(character):
-		return character_current_mp[character]
-	return character.max_mp
+	if character == player1:
+		return state.p1_current_mp
+	else:
+		return state.p2_current_mp
 
 ## 設置角色當前 MP
 func set_current_mp(character: Character, value: int) -> void:
-	character_current_mp[character] = clamp(value, 0, character.max_mp)
+	var max_mp = character.max_mp
+	var clamped = clamp(value, 0, max_mp)
+	if character == player1:
+		state.p1_current_mp = clamped
+	else:
+		state.p2_current_mp = clamped
 
 ## 獲取角色當前 STA
 func get_current_sta(character: Character) -> int:
-	if character_current_sta.has(character):
-		return character_current_sta[character]
-	return character.max_sta
+	if character == player1:
+		return state.p1_current_sta
+	else:
+		return state.p2_current_sta
 
 ## 設置角色當前 STA
 func set_current_sta(character: Character, value: int) -> void:
-	character_current_sta[character] = clamp(value, 0, character.max_sta)
+	var max_sta = character.max_sta
+	var clamped = clamp(value, 0, max_sta)
+	if character == player1:
+		state.p1_current_sta = clamped
+	else:
+		state.p2_current_sta = clamped
 
 # ==================== 輔助方法 ====================
 
@@ -476,3 +510,34 @@ func _parse_stance_type(stance_str: String) -> Variant:
 		_:
 			print("  [警告] 無法解析姿態類型: %s" % stance_str)
 			return null
+
+## 將 Character 轉換為玩家 ID（1 或 2）
+func get_player_id(character: Character) -> int:
+	return 1 if character == player1 else 2
+
+## 根據玩家 ID 獲取 Character
+func get_character_by_id(player_id: int) -> Character:
+	return player1 if player_id == 1 else player2
+
+# ==================== 冷卻管理 ====================
+
+## 獲取玩家冷卻字典
+func _get_player_cooldowns(character: Character) -> Dictionary:
+	if character == player1:
+		return state.p1_cooldowns
+	else:
+		return state.p2_cooldowns
+
+## 設置玩家冷卻字典
+func _set_player_cooldowns(character: Character, cooldowns: Dictionary) -> void:
+	if character == player1:
+		state.set_p1_cooldowns(cooldowns)
+	else:
+		state.set_p2_cooldowns(cooldowns)
+
+## 更新玩家姿態狀態
+func _update_player_stance(character: Character, stance_type: Stance.Type) -> void:
+	if character == player1:
+		state.p1_stance = stance_type
+	else:
+		state.p2_stance = stance_type

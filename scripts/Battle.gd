@@ -93,7 +93,7 @@ func _on_turn_start_selection(player1: Character, _player2: Character):
 		child.queue_free()
 	
 	# 更新提示文本
-	instruction_label.text = "請選擇行動 (第 %d 回合)" % battle_manager.current_turn
+	instruction_label.text = "請選擇行動 (第 %d 回合)" % battle_manager.state.turn
 	
 	# 顯示玩家 1 的可用動作按鈕
 	var available_actions = battle_manager._get_available_actions(player1)
@@ -114,7 +114,7 @@ func _on_turn_start_selection(player1: Character, _player2: Character):
 		moves_container.add_child(btn)
 	
 	# 記錄日誌
-	add_log_entry("第 %d 回合開始" % battle_manager.current_turn, SYSTEM_COLOR)
+	add_log_entry("第 %d 回合開始" % battle_manager.state.turn, SYSTEM_COLOR)
 
 ## 玩家選擇了動作
 func _on_action_selected(action: Action):
