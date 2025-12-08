@@ -15,6 +15,15 @@ class_name StatusEffect extends Resource
 # 狀態的文字描述
 @export var description: String = ""
 
+# ==================== 視覺資源 ====================
+
+@export_group("Visual Assets")
+# 狀態圖示路徑
+@export var icon_path: String = ""
+
+# 狀態特效場景路徑（持續顯示在角色身上）
+@export var vfx_path: String = ""
+
 # ==================== 持續時間 ====================
 
 # 狀態的持續時間。通常以回合數計算，-1 代表永久。

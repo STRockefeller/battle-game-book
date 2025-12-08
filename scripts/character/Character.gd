@@ -3,6 +3,26 @@ class_name Character extends Resource
 
 # --- 基本信息 ---
 @export var name: String = ""
+@export var asset_id: String = ""  # 用於資源路徑的唯一ID
+
+# --- 視覺資源路徑 ---
+@export_group("Visual Assets")
+@export var sprite_idle: String = ""
+@export var sprite_attack: String = ""
+@export var sprite_hit: String = ""
+@export var sprite_defend: String = ""
+@export var sprite_cast: String = ""
+@export var sprite_victory: String = ""
+@export var sprite_defeat: String = ""
+@export var sprite_low_hp: String = ""
+
+# --- 音效資源路徑 ---
+@export_group("Audio Assets")
+@export var audio_attack: String = ""
+@export var audio_hit: String = ""
+@export var audio_defend: String = ""
+@export var audio_victory: String = ""
+@export var audio_defeat: String = ""
 
 # --- 基礎屬性 (永久性) ---
 @export var strength: int = 0

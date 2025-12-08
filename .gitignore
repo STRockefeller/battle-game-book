@@ -3,3 +3,6 @@
 /android/
 *.tres
 *.tmp
+*.svg
+*.svg.import
+*.ogg
