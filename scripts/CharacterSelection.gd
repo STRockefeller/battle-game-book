@@ -39,8 +39,8 @@ func _scan_character_resources() -> void:
 	var file_name = dir.get_next()
 	
 	while file_name != "":
-		# 只加載 .tres 檔案
-		if file_name.ends_with(".tres") and not file_name.ends_with(".uid"):
+		# 只加載 .tres 檔案，跳過 Assets 檔案和 .uid 檔案以及 Story 檔案
+		if file_name.ends_with(".tres") and not file_name.ends_with(".uid") and not file_name.contains("Assets") and not file_name.contains("Story"):
 			var full_path = char_dir + file_name
 			var resource = load(full_path)
 			

@@ -6,14 +6,8 @@
 [node name="Battle" type="Control"]
 layout_mode = 3
 anchors_preset = 15
-anchor_left = 0.0
-anchor_top = 0.0
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = 0.0
-offset_top = 0.0
-offset_right = 0.0
-offset_bottom = 0.0
 grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_d17lq")
@@ -21,14 +15,8 @@ script = ExtResource("1_d17lq")
 [node name="MainContainer" type="VBoxContainer" parent="."]
 layout_mode = 1
 anchors_preset = 15
-anchor_left = 0.0
-anchor_top = 0.0
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = 0.0
-offset_top = 0.0
-offset_right = 0.0
-offset_bottom = 0.0
 grow_horizontal = 2
 grow_vertical = 2
 theme_override_constants/separation = 8
@@ -39,132 +27,79 @@ size_flags_vertical = 0
 theme_override_constants/separation = 16
 
 [node name="Player1Panel" type="PanelContainer" parent="MainContainer/CharacterStatusPanel"]
+custom_minimum_size = Vector2(250, 120)
 layout_mode = 2
 size_flags_horizontal = 3
-custom_minimum_size = Vector2(250, 120)
 
 [node name="MarginContainer" type="MarginContainer" parent="MainContainer/CharacterStatusPanel/Player1Panel"]
-layout_mode = 1
-anchors_preset = 15
-anchor_left = 0.0
-anchor_top = 0.0
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_left = 0.0
-offset_top = 0.0
-offset_right = 0.0
-offset_bottom = 0.0
-grow_horizontal = 2
-grow_vertical = 2
-theme_override_margins/left = 12
-theme_override_margins/top = 12
-theme_override_margins/right = 12
-theme_override_margins/bottom = 12
+layout_mode = 2
 
 [node name="VBoxContainer" type="VBoxContainer" parent="MainContainer/CharacterStatusPanel/Player1Panel/MarginContainer"]
-layout_mode = 1
-anchors_preset = 15
-anchor_left = 0.0
-anchor_top = 0.0
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_left = 0.0
-offset_top = 0.0
-offset_right = 0.0
-offset_bottom = 0.0
-grow_horizontal = 2
-grow_vertical = 2
+layout_mode = 2
 
 [node name="NameLabel" type="Label" parent="MainContainer/CharacterStatusPanel/Player1Panel/MarginContainer/VBoxContainer"]
 layout_mode = 2
-text = "勇者"
 theme_override_font_sizes/font_size = 20
+text = "勇者"
 
 [node name="HpLabel" type="Label" parent="MainContainer/CharacterStatusPanel/Player1Panel/MarginContainer/VBoxContainer"]
 layout_mode = 2
-text = "HP: 120 / 120"
 theme_override_font_sizes/font_size = 14
+text = "HP: 120 / 120"
 
 [node name="MpLabel" type="Label" parent="MainContainer/CharacterStatusPanel/Player1Panel/MarginContainer/VBoxContainer"]
 layout_mode = 2
-text = "MP: 40 / 40"
 theme_override_font_sizes/font_size = 14
+text = "MP: 40 / 40"
 
 [node name="StaLabel" type="Label" parent="MainContainer/CharacterStatusPanel/Player1Panel/MarginContainer/VBoxContainer"]
 layout_mode = 2
-text = "STA: 64 / 64"
 theme_override_font_sizes/font_size = 14
+text = "STA: 64 / 64"
 
 [node name="StanceLabel" type="Label" parent="MainContainer/CharacterStatusPanel/Player1Panel/MarginContainer/VBoxContainer"]
 layout_mode = 2
-text = "姿態: 站立"
 theme_override_font_sizes/font_size = 12
+text = "姿態: 站立"
 
 [node name="CenterSpacer" type="Control" parent="MainContainer/CharacterStatusPanel"]
 layout_mode = 2
-size_flags_horizontal = 1
 
 [node name="Player2Panel" type="PanelContainer" parent="MainContainer/CharacterStatusPanel"]
+custom_minimum_size = Vector2(250, 120)
 layout_mode = 2
 size_flags_horizontal = 3
-custom_minimum_size = Vector2(250, 120)
 
 [node name="MarginContainer" type="MarginContainer" parent="MainContainer/CharacterStatusPanel/Player2Panel"]
-layout_mode = 1
-anchors_preset = 15
-anchor_left = 0.0
-anchor_top = 0.0
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_left = 0.0
-offset_top = 0.0
-offset_right = 0.0
-offset_bottom = 0.0
-grow_horizontal = 2
-grow_vertical = 2
-theme_override_margins/left = 12
-theme_override_margins/top = 12
-theme_override_margins/right = 12
-theme_override_margins/bottom = 12
+layout_mode = 2
 
 [node name="VBoxContainer" type="VBoxContainer" parent="MainContainer/CharacterStatusPanel/Player2Panel/MarginContainer"]
-layout_mode = 1
-anchors_preset = 15
-anchor_left = 0.0
-anchor_top = 0.0
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_left = 0.0
-offset_top = 0.0
-offset_right = 0.0
-offset_bottom = 0.0
-grow_horizontal = 2
-grow_vertical = 2
+layout_mode = 2
 
 [node name="NameLabel" type="Label" parent="MainContainer/CharacterStatusPanel/Player2Panel/MarginContainer/VBoxContainer"]
 layout_mode = 2
-text = "勇者"
 theme_override_font_sizes/font_size = 20
+text = "勇者"
 
 [node name="HpLabel" type="Label" parent="MainContainer/CharacterStatusPanel/Player2Panel/MarginContainer/VBoxContainer"]
 layout_mode = 2
-text = "HP: 120 / 120"
 theme_override_font_sizes/font_size = 14
+text = "HP: 120 / 120"
 
 [node name="MpLabel" type="Label" parent="MainContainer/CharacterStatusPanel/Player2Panel/MarginContainer/VBoxContainer"]
 layout_mode = 2
-text = "MP: 40 / 40"
 theme_override_font_sizes/font_size = 14
+text = "MP: 40 / 40"
 
 [node name="StaLabel" type="Label" parent="MainContainer/CharacterStatusPanel/Player2Panel/MarginContainer/VBoxContainer"]
 layout_mode = 2
-text = "STA: 64 / 64"
 theme_override_font_sizes/font_size = 14
+text = "STA: 64 / 64"
 
 [node name="StanceLabel" type="Label" parent="MainContainer/CharacterStatusPanel/Player2Panel/MarginContainer/VBoxContainer"]
 layout_mode = 2
-text = "姿態: 站立"
 theme_override_font_sizes/font_size = 12
+text = "姿態: 站立"
 
 [node name="CenterContainer" type="CenterContainer" parent="MainContainer"]
 layout_mode = 2
@@ -172,8 +107,8 @@ size_flags_vertical = 3
 
 [node name="BattleAreaPlaceholder" type="Label" parent="MainContainer/CenterContainer"]
 layout_mode = 2
-text = "【戰鬥場景】"
 theme_override_font_sizes/font_size = 18
+text = "【戰鬥場景】"
 
 [node name="BottomContainer" type="HBoxContainer" parent="MainContainer"]
 layout_mode = 2
@@ -181,88 +116,36 @@ size_flags_vertical = 2
 theme_override_constants/separation = 8
 
 [node name="LogBox" type="PanelContainer" parent="MainContainer/BottomContainer"]
+custom_minimum_size = Vector2(400, 200)
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
-custom_minimum_size = Vector2(400, 200)
 
 [node name="MarginContainer" type="MarginContainer" parent="MainContainer/BottomContainer/LogBox"]
-layout_mode = 1
-anchors_preset = 15
-anchor_left = 0.0
-anchor_top = 0.0
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_left = 0.0
-offset_top = 0.0
-offset_right = 0.0
-offset_bottom = 0.0
-grow_horizontal = 2
-grow_vertical = 2
-theme_override_margins/left = 8
-theme_override_margins/top = 8
-theme_override_margins/right = 8
-theme_override_margins/bottom = 8
+layout_mode = 2
 
 [node name="LogContent" type="RichTextLabel" parent="MainContainer/BottomContainer/LogBox/MarginContainer"]
-layout_mode = 1
-anchors_preset = 15
-anchor_left = 0.0
-anchor_top = 0.0
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_left = 0.0
-offset_top = 0.0
-offset_right = 0.0
-offset_bottom = 0.0
-grow_horizontal = 2
-grow_vertical = 2
+layout_mode = 2
 bbcode_enabled = true
 scroll_following = true
 
 [node name="ActionPanel" type="PanelContainer" parent="MainContainer/BottomContainer"]
+custom_minimum_size = Vector2(300, 200)
 layout_mode = 2
 size_flags_horizontal = 2
-custom_minimum_size = Vector2(300, 200)
 
 [node name="MarginContainer" type="MarginContainer" parent="MainContainer/BottomContainer/ActionPanel"]
-layout_mode = 1
-anchors_preset = 15
-anchor_left = 0.0
-anchor_top = 0.0
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_left = 0.0
-offset_top = 0.0
-offset_right = 0.0
-offset_bottom = 0.0
-grow_horizontal = 2
-grow_vertical = 2
-theme_override_margins/left = 8
-theme_override_margins/top = 8
-theme_override_margins/right = 8
-theme_override_margins/bottom = 8
+layout_mode = 2
 
 [node name="VBoxContainer" type="VBoxContainer" parent="MainContainer/BottomContainer/ActionPanel/MarginContainer"]
-layout_mode = 1
-anchors_preset = 15
-anchor_left = 0.0
-anchor_top = 0.0
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_left = 0.0
-offset_top = 0.0
-offset_right = 0.0
-offset_bottom = 0.0
-grow_horizontal = 2
-grow_vertical = 2
+layout_mode = 2
 theme_override_constants/separation = 8
 
 [node name="InstructionLabel" type="Label" parent="MainContainer/BottomContainer/ActionPanel/MarginContainer/VBoxContainer"]
 layout_mode = 2
 size_flags_vertical = 0
-text = "選擇行動:"
 theme_override_font_sizes/font_size = 14
+text = "選擇行動:"
 
 [node name="MovesContainer" type="VBoxContainer" parent="MainContainer/BottomContainer/ActionPanel/MarginContainer/VBoxContainer"]
 layout_mode = 2

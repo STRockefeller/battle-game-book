@@ -292,8 +292,6 @@ prefer_high_damage = false
 
 ```gdscript
 # resources/ai/AIAggressive.tres
-[gd_resource type="Resource" load_steps=2 format=3]
-
 [ext_resource path="res://scripts/ai/AIBehaviorResource.gd" type="Script" id=1]
 
 [resource]

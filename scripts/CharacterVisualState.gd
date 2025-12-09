@@ -58,76 +58,91 @@ func set_knocked_down(knocked_down: bool) -> void:
 	is_knocked_down = knocked_down
 
 ## 取得當前應該顯示的精靈圖路徑（帶fallback）
-## @param base_sprite_paths: 角色基礎精靈圖路徑字典 {pose: path}
+## @param character_assets: 角色資源定義
 ## @return 精靈圖路徑列表（優先級從高到低）
-func get_sprite_paths(base_sprite_paths: Dictionary) -> Array[String]:
+func get_sprite_paths(character_assets) -> Array[String]:
 	var paths: Array[String] = []
+	
+	# 如果沒有資源定義，返回空列表
+	if not character_assets:
+		return paths
 	
 	# 如果是擊倒狀態，優先使用擊倒精靈圖
 	if is_knocked_down:
-		var knockdown_path = "res://assets/sprites/%s/knockdown.svg" % character_id
-		paths.append(knockdown_path)
-	
-	# 根據當前姿勢添加路徑
-	var pose_key = Pose.keys()[current_pose].to_lower()
+		var knockdown_path = character_assets.sprite_defeat
+		if not knockdown_path.is_empty():
+			paths.append(knockdown_path)
 	
 	# 低血量時的特殊精靈圖
 	if hp_percentage < 0.3 and current_pose == Pose.IDLE:
-		var low_hp_path = "res://assets/sprites/%s/idle_low_hp.svg" % character_id
-		paths.append(low_hp_path)
+		var low_hp_path = character_assets.sprite_low_hp
+		if not low_hp_path.is_empty():
+			paths.append(low_hp_path)
 	
 	# 添加當前姿勢的精靈圖
-	if base_sprite_paths.has(current_pose):
-		paths.append(base_sprite_paths[current_pose])
-	else:
-		var pose_path = "res://assets/sprites/%s/%s.svg" % [character_id, pose_key]
+	var pose_path = character_assets.get_sprite_path(current_pose)
+	if not pose_path.is_empty():
 		paths.append(pose_path)
 	
 	# Fallback到idle
 	if current_pose != Pose.IDLE:
-		if base_sprite_paths.has(Pose.IDLE):
-			paths.append(base_sprite_paths[Pose.IDLE])
-		else:
-			var idle_path = "res://assets/sprites/%s/idle.svg" % character_id
+		var idle_path = character_assets.sprite_idle
+		if not idle_path.is_empty():
 			paths.append(idle_path)
 	
 	return paths
 
 ## 取得當前應該播放的音效路徑（帶fallback）
-## @param base_audio_paths: 角色基礎音效路徑字典 {pose: path}
+## @param character_assets: 角色資源定義
 ## @return 音效路徑列表（優先級從高到低）
-func get_audio_paths(base_audio_paths: Dictionary) -> Array[String]:
+func get_audio_paths(character_assets) -> Array[String]:
 	var paths: Array[String] = []
 	
-	# 根據當前姿勢添加路徑
-	if base_audio_paths.has(current_pose):
-		paths.append(base_audio_paths[current_pose])
-	else:
-		var pose_key = Pose.keys()[current_pose].to_lower()
-		var audio_path = "res://assets/audio/%s/%s.ogg" % [character_id, pose_key]
-		paths.append(audio_path)
+	# 如果沒有資源定義，返回空列表
+	if not character_assets:
+		return paths
+	
+	# 根據當前姿勢添加對應的音效
+	match current_pose:
+		Pose.ATTACK:
+			if not character_assets.audio_attack.is_empty():
+				paths.append(character_assets.audio_attack)
+		Pose.HIT:
+			if not character_assets.audio_hit.is_empty():
+				paths.append(character_assets.audio_hit)
+		Pose.DEFEND:
+			if not character_assets.audio_defend.is_empty():
+				paths.append(character_assets.audio_defend)
+		Pose.VICTORY:
+			if not character_assets.audio_victory.is_empty():
+				paths.append(character_assets.audio_victory)
+		Pose.DEFEAT:
+			if not character_assets.audio_defeat.is_empty():
+				paths.append(character_assets.audio_defeat)
 	
 	return paths
 
 ## 取得當前應該顯示的狀態效果圖示路徑列表
+## @param active_status_assets: 活躍的狀態效果資源列表
 ## @return 狀態效果圖示路徑陣列
-func get_status_icon_paths() -> Array[String]:
+func get_status_icon_paths(active_status_assets) -> Array[String]:
 	var paths: Array[String] = []
 	
-	for status_id in active_status_effects:
-		var icon_path = "res://assets/sprites/status_icons/%s.png" % status_id
-		paths.append(icon_path)
+	for status_assets in active_status_assets:
+		if status_assets and not status_assets.icon_path.is_empty():
+			paths.append(status_assets.icon_path)
 	
 	return paths
 
 ## 取得當前應該播放的狀態效果VFX路徑列表
+## @param active_status_assets: 活躍的狀態效果資源列表
 ## @return 狀態效果VFX路徑陣列
-func get_status_vfx_paths() -> Array[String]:
+func get_status_vfx_paths(active_status_assets) -> Array[String]:
 	var paths: Array[String] = []
 	
-	for status_id in active_status_effects:
-		var vfx_path = "res://assets/vfx/status/%s.tscn" % status_id
-		paths.append(vfx_path)
+	for status_assets in active_status_assets:
+		if status_assets and not status_assets.vfx_path.is_empty():
+			paths.append(status_assets.vfx_path)
 	
 	return paths
 

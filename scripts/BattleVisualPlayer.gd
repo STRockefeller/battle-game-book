@@ -44,13 +44,13 @@ func _ready() -> void:
 ## 播放完整的動作序列
 ## @param character_sprite: 角色精靈節點
 ## @param visual_state: 角色視覺狀態
-## @param action_data: 動作數據（包含音效、特效路徑）
-## @param duration: 動畫持續時間（秒）
+## @param action_assets: 動作資源定義
+## @param character_assets: 角色資源定義（用於loading)
 func play_action_sequence(
 	character_sprite: Sprite2D,
 	visual_state: CharacterVisualState,
-	action_data: Dictionary,
-	duration: float = 0.5
+	action_assets,
+	character_assets
 ) -> void:
 	if current_state == PlaybackState.PLAYING:
 		push_warning("BattleVisualPlayer: 已有動畫正在播放")
@@ -60,74 +60,95 @@ func play_action_sequence(
 	animation_started.emit()
 	
 	# 1. 更新角色精靈圖
-	_update_character_sprite(character_sprite, visual_state)
+	_update_character_sprite(character_sprite, visual_state, character_assets)
 	
 	# 2. 播放音效
-	if action_data.has("audio_path") and not action_data["audio_path"].is_empty():
-		_play_audio(action_data["audio_path"])
+	if action_assets and not action_assets.audio_cast.is_empty():
+		_play_audio(action_assets.audio_cast)
 	
 	# 3. 播放特效
-	if action_data.has("vfx_path") and not action_data["vfx_path"].is_empty():
-		_play_vfx(action_data["vfx_path"], character_sprite.global_position)
+	if action_assets and not action_assets.vfx_cast.is_empty():
+		_play_vfx(action_assets.vfx_cast, character_sprite.global_position)
 	
 	# 4. 設定動畫持續時間
+	var duration = action_assets.animation_duration if action_assets else 0.5
 	_animation_timer.start(duration)
 
 ## 播放角色受擊序列
 ## @param character_sprite: 角色精靈節點
 ## @param visual_state: 角色視覺狀態
-## @param hit_vfx_path: 受擊特效路徑
+## @param character_assets: 角色資源定義
+## @param hit_vfx_path: 受擊特效路徑（可選，會覆蓋預設）
 ## @param duration: 動畫持續時間
 func play_hit_sequence(
 	character_sprite: Sprite2D,
 	visual_state: CharacterVisualState,
+	character_assets,
 	hit_vfx_path: String = "",
 	duration: float = 0.3
 ) -> void:
 	# 設定受擊姿勢
 	visual_state.set_pose(CharacterVisualState.Pose.HIT)
 	
-	var hit_data = {
-		"audio_path": "res://assets/audio/common/hit.ogg",
-		"vfx_path": hit_vfx_path if not hit_vfx_path.is_empty() else "res://assets/vfx/hit_default.tscn"
-	}
+	current_state = PlaybackState.PLAYING
+	animation_started.emit()
 	
-	play_action_sequence(character_sprite, visual_state, hit_data, duration)
+	# 更新精靈圖
+	_update_character_sprite(character_sprite, visual_state, character_assets)
+	
+	# 播放音效
+	if character_assets and not character_assets.audio_hit.is_empty():
+		_play_audio(character_assets.audio_hit)
+	
+	# 播放特效
+	var vfx_path = hit_vfx_path if not hit_vfx_path.is_empty() else "res://assets/vfx/default_effect.tscn"
+	if not vfx_path.is_empty():
+		_play_vfx(vfx_path, character_sprite.global_position)
+	
+	# 設定動畫時長
+	_animation_timer.start(duration)
 
 ## 播放角色待機動畫
 ## @param character_sprite: 角色精靈節點
 ## @param visual_state: 角色視覺狀態
-func play_idle(character_sprite: Sprite2D, visual_state: CharacterVisualState) -> void:
+## @param character_assets: 角色資源定義
+func play_idle(character_sprite: Sprite2D, visual_state: CharacterVisualState, character_assets) -> void:
 	visual_state.set_pose(CharacterVisualState.Pose.IDLE)
-	_update_character_sprite(character_sprite, visual_state)
+	_update_character_sprite(character_sprite, visual_state, character_assets)
 
 ## 播放勝利動畫
 ## @param character_sprite: 角色精靈節點
 ## @param visual_state: 角色視覺狀態
-func play_victory(character_sprite: Sprite2D, visual_state: CharacterVisualState) -> void:
+## @param character_assets: 角色資源定義
+func play_victory(character_sprite: Sprite2D, visual_state: CharacterVisualState, character_assets) -> void:
 	visual_state.set_pose(CharacterVisualState.Pose.VICTORY)
 	
-	var victory_data = {
-		"audio_path": "res://assets/audio/common/victory.ogg",
-		"vfx_path": ""
-	}
+	current_state = PlaybackState.PLAYING
+	animation_started.emit()
 	
-	play_action_sequence(character_sprite, visual_state, victory_data, 1.0)
+	_update_character_sprite(character_sprite, visual_state, character_assets)
+	
+	# 播放音效
+	if character_assets and not character_assets.audio_victory.is_empty():
+		_play_audio(character_assets.audio_victory)
+	
+	_animation_timer.start(1.0)
 
 ## 播放失敗動畫
 ## @param character_sprite: 角色精靈節點
 ## @param visual_state: 角色視覺狀態
-func play_defeat(character_sprite: Sprite2D, visual_state: CharacterVisualState) -> void:
+## @param character_assets: 角色資源定義
+func play_defeat(character_sprite: Sprite2D, visual_state: CharacterVisualState, character_assets) -> void:
 	visual_state.set_pose(CharacterVisualState.Pose.DEFEAT)
-	_update_character_sprite(character_sprite, visual_state)
+	_update_character_sprite(character_sprite, visual_state, character_assets)
 
 ## 更新角色精靈圖
-func _update_character_sprite(sprite: Sprite2D, visual_state: CharacterVisualState) -> void:
-	if sprite == null:
+func _update_character_sprite(sprite: Sprite2D, visual_state: CharacterVisualState, character_assets) -> void:
+	if sprite == null or character_assets == null:
 		return
 	
 	# 取得精靈圖路徑（帶fallback）
-	var sprite_paths = visual_state.get_sprite_paths({})
+	var sprite_paths = visual_state.get_sprite_paths(character_assets)
 	
 	# 嘗試載入精靈圖
 	for path in sprite_paths:

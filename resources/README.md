@@ -64,7 +64,7 @@ resources/characters/
 │   ├── Goblin.tres
 │   └── ...
 └── npcs/            # NPC 角色
-    └── ...
+	└── ...
 ```
 
 ### 3. 動作分類
@@ -80,8 +80,8 @@ resources/actions/
 │   ├── HeroSlash.tres
 │   └── ...
 └── elise/           # 艾莉絲動作
-    ├── EliseVineLash.tres
-    └── ...
+	├── EliseVineLash.tres
+	└── ...
 ```
 
 ### 4. 狀態效果分類
@@ -96,8 +96,8 @@ resources/statuses/
 │   ├── Regen.tres
 │   └── ...
 └── control/         # 控制效果
-    ├── Knockdown.tres
-    └── ...
+	├── Knockdown.tres
+	└── ...
 ```
 
 ## 資源 ID 命名規範

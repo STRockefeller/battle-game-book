@@ -45,7 +45,7 @@ func reset_to_standing() -> void:
 func get_current_stance_type() -> Stance.Type:
 	return current_stance.type
 
-## 獲取當前姿態名稱
+## 獲取當前姿態名稱（中文，用於 UI 顯示）
 func get_current_stance_name() -> String:
 	match current_stance.type:
 		Stance.Type.STANDING:
@@ -58,6 +58,20 @@ func get_current_stance_name() -> String:
 			return "防禦"
 		_:
 			return "未知"
+
+## 獲取當前姿態 ID（英文鍵值，用於邏輯檢查）
+func get_current_stance_id() -> String:
+	match current_stance.type:
+		Stance.Type.STANDING:
+			return "standing"
+		Stance.Type.KNOCKED_DOWN:
+			return "knocked_down"
+		Stance.Type.AIRBORNE:
+			return "airborne"
+		Stance.Type.GUARDING:
+			return "guarding"
+		_:
+			return "unknown"
 
 ## 獲取當前姿態描述
 func get_current_stance_description() -> String:

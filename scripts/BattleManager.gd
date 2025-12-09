@@ -397,21 +397,21 @@ func _check_battle_end() -> bool:
 func _get_available_actions(character: Character) -> Array[Action]:
 	var available: Array[Action] = []
 	var current_stance = character.stance_manager.get_current_stance_type()
+	var current_stance_id = character.stance_manager.get_current_stance_id()
 	
 	# 如果角色處於倒地狀態，只能使用起身動作
 	if current_stance == Stance.Type.KNOCKED_DOWN:
 		for action in character.available_actions:
-			if "stand_up" in action.tags:
+			if action.is_usable_in(current_stance_id):
 				available.append(action)
 		return available
 	
-	# 正常情況下檢查姿態限制
+	# 正常情況下檢查姿態限制和其他條件
 	for action in character.available_actions:
-		# 倒地專用動作不應在正常狀態下顯示
-		if "stand_up" in action.tags:
+		# 檢查動作是否可在當前姿態執行
+		if not action.is_usable_in(current_stance_id):
 			continue
-		if character.can_perform_action(action.tags[0] if action.tags.size() > 0 else ""):
-			available.append(action)
+		available.append(action)
 	
 	return available
 

@@ -8,12 +8,9 @@ class_name Action
 @export var description: String
 
 # --- 視覺和音效資源 ---
-@export_group("Visual & Audio Assets")
-@export var animation_sprite: String = ""  # 動作動畫精靈圖
-@export var audio_cast: String = ""  # 施放音效
-@export var audio_hit: String = ""  # 命中音效
-@export var vfx_cast: String = ""  # 施放特效場景路徑
-@export var vfx_hit: String = ""  # 命中特效場景路徑
+@export var action_assets: ActionAssets = null  # 動作的所有視覺資源定義
+
+# --- 動畫時長 ---
 @export var animation_duration: float = 0.5  # 動畫持續時間（秒）
 
 # --- 成本 ---

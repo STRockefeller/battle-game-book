@@ -9,8 +9,8 @@ const SYSTEM_COLOR := "yellow"
 # 視覺播放系統
 var visual_player: BattleVisualPlayer = null
 var asset_manager: AssetManager = null
-var p1_visual_state: CharacterVisualState = null
-var p2_visual_state: CharacterVisualState = null
+var p1_visual_state = null
+var p2_visual_state = null
 
 # 角色精靈節點（需要在場景中手動添加或動態創建）
 var p1_sprite: Sprite2D = null
@@ -70,11 +70,11 @@ func _initialize_visual_system() -> void:
 	
 	# 初始化角色視覺狀態
 	if battle_manager.player1:
-		p1_visual_state = CharacterVisualState.new(battle_manager.player1.asset_id)
+		p1_visual_state = CharacterVisualState.new(battle_manager.player1.name)
 		p1_visual_state.update_hp(battle_manager.get_current_hp(battle_manager.player1), battle_manager.player1.max_hp)
 	
 	if battle_manager.player2:
-		p2_visual_state = CharacterVisualState.new(battle_manager.player2.asset_id)
+		p2_visual_state = CharacterVisualState.new(battle_manager.player2.name)
 		p2_visual_state.update_hp(battle_manager.get_current_hp(battle_manager.player2), battle_manager.player2.max_hp)
 	
 	# 創建角色精靈節點
@@ -135,11 +135,11 @@ func update_character_status(character: Character, is_player1: bool):
 
 ## 更新角色精靈圖
 func _update_character_sprites() -> void:
-	if p1_visual_state and p1_sprite:
-		visual_player.play_idle(p1_sprite, p1_visual_state)
+	if p1_visual_state and p1_sprite and battle_manager.player1 and battle_manager.player1.character_assets:
+		visual_player.play_idle(p1_sprite, p1_visual_state, battle_manager.player1.character_assets)
 	
-	if p2_visual_state and p2_sprite:
-		visual_player.play_idle(p2_sprite, p2_visual_state)
+	if p2_visual_state and p2_sprite and battle_manager.player2 and battle_manager.player2.character_assets:
+		visual_player.play_idle(p2_sprite, p2_visual_state, battle_manager.player2.character_assets)
 
 func _apply_status_colors() -> void:
 	var p1_labels = [p1_name_label, p1_hp_label, p1_mp_label, p1_sta_label, p1_stance_label]
@@ -220,23 +220,19 @@ func _on_action_executed(user: Character, target: Character, action: Action, res
 	if user_visual_state:
 		user_visual_state.set_pose(CharacterVisualState.Pose.ATTACK)
 	
-	# 播放動作動畫
-	var action_data = {
-		"audio_path": action.audio_cast,
-		"vfx_path": action.vfx_cast
-	}
-	
-	if visual_player and user_sprite and user_visual_state:
-		visual_player.play_action_sequence(user_sprite, user_visual_state, action_data, action.animation_duration)
+	# 播放動作動畫（傳遞ActionAssets和CharacterAssets）
+	if visual_player and user_sprite and user_visual_state and action.action_assets and user.character_assets:
+		visual_player.play_action_sequence(user_sprite, user_visual_state, action.action_assets, user.character_assets)
 	
 	if result["hit"]:
 		log_message += "！命中！造成 %d 傷害" % result["actual_damage"]
 		
 		# 播放受擊效果
-		if visual_player and target_sprite and target_visual_state:
+		if visual_player and target_sprite and target_visual_state and action.action_assets and target.character_assets:
 			# 等待動作動畫完成後播放受擊
-			await get_tree().create_timer(action.animation_duration * 0.7).timeout
-			visual_player.play_hit_sequence(target_sprite, target_visual_state, action.vfx_hit, 0.3)
+			var action_duration = action.action_assets.animation_duration if action.action_assets else 1.0
+			await get_tree().create_timer(action_duration * 0.7).timeout
+			visual_player.play_hit_sequence(target_sprite, target_visual_state, target.character_assets, action.action_assets.vfx_hit, 0.3)
 		
 		if result["status_applied"]:
 			log_message += "，施加了 %s" % result["status_applied"]
@@ -276,12 +272,13 @@ func _on_battle_ended(winner: Character):
 		var loser_sprite = p2_sprite if is_winner_p1 else p1_sprite
 		var winner_visual_state = p1_visual_state if is_winner_p1 else p2_visual_state
 		var loser_visual_state = p2_visual_state if is_winner_p1 else p1_visual_state
+		var loser = battle_manager.player2 if is_winner_p1 else battle_manager.player1
 		
 		if visual_player:
-			if winner_visual_state:
-				visual_player.play_victory(winner_sprite, winner_visual_state)
-			if loser_visual_state:
-				visual_player.play_defeat(loser_sprite, loser_visual_state)
+			if winner_visual_state and winner.character_assets:
+				visual_player.play_victory(winner_sprite, winner_visual_state, winner.character_assets)
+			if loser_visual_state and loser and loser.character_assets:
+				visual_player.play_defeat(loser_sprite, loser_visual_state, loser.character_assets)
 	else:
 		instruction_label.text = "戰鬥結束！平局。按任意鍵返回主選單..."
 		add_log_entry("戰鬥結束！平局", "gold")

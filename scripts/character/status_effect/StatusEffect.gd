@@ -17,12 +17,8 @@ class_name StatusEffect extends Resource
 
 # ==================== 視覺資源 ====================
 
-@export_group("Visual Assets")
-# 狀態圖示路徑
-@export var icon_path: String = ""
-
-# 狀態特效場景路徑（持續顯示在角色身上）
-@export var vfx_path: String = ""
+# 狀態的視覺資源定義（圖示、特效等）
+@export var effect_assets: StatusEffectAssets = null
 
 # ==================== 持續時間 ====================
 
