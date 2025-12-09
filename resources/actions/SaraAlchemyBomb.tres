@@ -1,0 +1,30 @@
+[gd_resource type="Resource" script_class="Action" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/character/action/Action.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = "sara_alchemy_bomb"
+name = "鍊金爆彈"
+description = "投擲鍊金爆彈，造成元素傷害並可能觸發爆炸"
+action_assets = null
+animation_duration = 0.6
+cost_stamina = 9
+cost_mp = 12
+cast_time = 0
+cooldown = 1
+allowed_stances = PackedStringArray()
+disallowed_stances = PackedStringArray()
+tags = PackedStringArray("alchemy", "magic", "ranged", "aoe")
+is_movement = false
+damage_multiplier = 1.2
+power = 18
+accuracy_modifier = 0
+critical_modifier = 0.2
+applicable_ranges = PackedStringArray("mid", "far")
+out_of_range_penalty = {}
+effects_on_hit = PackedStringArray()
+effects_on_use = PackedStringArray()
+target_stance_change_to = ""
+user_stance_change_to = ""
+priority = 1

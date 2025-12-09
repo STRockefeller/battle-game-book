@@ -1,0 +1,30 @@
+[gd_resource type="Resource" script_class="Action" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/character/action/Action.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = "mina_dream_erosion"
+name = "夢境侵蝕"
+description = "侵蝕敵人的夢境，造成魔法傷害並造成持續傷害"
+action_assets = null
+animation_duration = 0.9
+cost_stamina = 11
+cost_mp = 22
+cast_time = 1
+cooldown = 2
+allowed_stances = PackedStringArray()
+disallowed_stances = PackedStringArray()
+tags = PackedStringArray("dream", "magic", "damage")
+is_movement = false
+damage_multiplier = 1.3
+power = 20
+accuracy_modifier = 0.1
+critical_modifier = 0
+applicable_ranges = PackedStringArray("mid", "far")
+out_of_range_penalty = {}
+effects_on_hit = PackedStringArray()
+effects_on_use = PackedStringArray()
+target_stance_change_to = ""
+user_stance_change_to = ""
+priority = 1

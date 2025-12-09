@@ -1,0 +1,30 @@
+[gd_resource type="Resource" script_class="Action" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/character/action/Action.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = "common_stand_up"
+name = "起身"
+description = "從倒地狀態起身"
+action_assets = null
+animation_duration = 0.5
+cost_stamina = 6
+cost_mp = 0
+cast_time = 0
+cooldown = 0
+allowed_stances = PackedStringArray("knocked_down")
+disallowed_stances = PackedStringArray()
+tags = PackedStringArray("movement", "recovery")
+is_movement = false
+damage_multiplier = 0
+power = 0
+accuracy_modifier = 0
+critical_modifier = 0
+applicable_ranges = PackedStringArray("close")
+out_of_range_penalty = {}
+effects_on_hit = PackedStringArray()
+effects_on_use = PackedStringArray()
+target_stance_change_to = ""
+user_stance_change_to = "standing"
+priority = 1

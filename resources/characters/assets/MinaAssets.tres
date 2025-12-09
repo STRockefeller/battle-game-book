@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="CharacterAssets" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/character/CharacterAssets.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+sprite_idle = "res://assets/sprites/default_character.svg"
+sprite_attack = "res://assets/sprites/default_character.svg"
+sprite_hit = "res://assets/sprites/default_character.svg"
+sprite_defend = "res://assets/sprites/default_character.svg"
+sprite_cast = "res://assets/sprites/default_character.svg"
+sprite_victory = "res://assets/sprites/default_character.svg"
+sprite_defeat = "res://assets/sprites/default_character.svg"
+sprite_low_hp = "res://assets/sprites/default_character.svg"
+audio_attack = "res://assets/audio/hero/attack.ogg"
+audio_hit = "res://assets/audio/hero/hit.ogg"
+audio_defend = "res://assets/audio/hero/defend.ogg"
+audio_victory = "res://assets/audio/hero/victory.ogg"
+audio_defeat = "res://assets/audio/hero/defeat.ogg"

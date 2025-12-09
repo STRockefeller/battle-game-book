@@ -1,0 +1,20 @@
+[gd_resource type="Resource" script_class="Character" load_steps=5 format=3]
+
+[ext_resource type="Script" path="res://scripts/character/Character.gd" id="1"]
+[ext_resource type="Resource" path="res://resources/characters/assets/SaraAssets.tres" id="2"]
+[ext_resource type="Resource" path="res://resources/actions/SaraAlchemyBomb.tres" id="3"]
+[ext_resource type="Resource" path="res://resources/actions/SaraElementShift.tres" id="4"]
+[ext_resource type="Resource" path="res://resources/actions/SaraEnergyRepair.tres" id="5"]
+
+[resource]
+script = ExtResource("1")
+name = "薩拉"
+character_assets = ExtResource("2")
+strength = 5
+intelligence = 11
+agility = 11
+constitution = 5
+luck = 8
+max_hp = 100
+max_mp = 165
+available_actions = [ExtResource("3"), ExtResource("4"), ExtResource("5")]

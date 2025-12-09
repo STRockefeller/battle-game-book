@@ -1,0 +1,30 @@
+[gd_resource type="Resource" script_class="Action" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/character/action/Action.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = "mina_hypnosis"
+name = "催眠術"
+description = "施展催眠咒語，使敵人陷入催眠狀態"
+action_assets = null
+animation_duration = 1
+cost_stamina = 12
+cost_mp = 18
+cast_time = 2
+cooldown = 3
+allowed_stances = PackedStringArray()
+disallowed_stances = PackedStringArray()
+tags = PackedStringArray("mind", "magic", "control")
+is_movement = false
+damage_multiplier = 0
+power = 0
+accuracy_modifier = -0.2
+critical_modifier = 0
+applicable_ranges = PackedStringArray("mid", "far")
+out_of_range_penalty = {}
+effects_on_hit = PackedStringArray()
+effects_on_use = PackedStringArray()
+target_stance_change_to = "knocked_down"
+user_stance_change_to = ""
+priority = 3

@@ -1,0 +1,30 @@
+[gd_resource type="Resource" script_class="Action" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/character/action/Action.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = "rag_earth_quake"
+name = "地裂衝擊"
+description = "引發地震，對所有敵人造成傷害"
+action_assets = null
+animation_duration = 1
+cost_stamina = 15
+cost_mp = 20
+cast_time = 2
+cooldown = 3
+allowed_stances = PackedStringArray()
+disallowed_stances = PackedStringArray()
+tags = PackedStringArray("earth", "aoe", "magic")
+is_movement = false
+damage_multiplier = 1.2
+power = 22
+accuracy_modifier = -0.1
+critical_modifier = 0
+applicable_ranges = PackedStringArray("close", "mid", "far")
+out_of_range_penalty = {}
+effects_on_hit = PackedStringArray()
+effects_on_use = PackedStringArray()
+target_stance_change_to = ""
+user_stance_change_to = ""
+priority = 3

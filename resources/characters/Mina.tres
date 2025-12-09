@@ -1,0 +1,21 @@
+[gd_resource type="Resource" script_class="Character" load_steps=7 format=3 uid="uid://fu77euwxydtb"]
+
+[ext_resource type="Script" uid="uid://domisvh5oa808" path="res://scripts/character/Character.gd" id="1"]
+[ext_resource type="Script" uid="uid://lib35gjqlung" path="res://scripts/character/action/Action.gd" id="1_k5j51"]
+[ext_resource type="Resource" path="res://resources/characters/assets/MinaAssets.tres" id="2"]
+[ext_resource type="Resource" path="res://resources/actions/MinaIllusion.tres" id="3"]
+[ext_resource type="Resource" path="res://resources/actions/MinaHypnosis.tres" id="4"]
+[ext_resource type="Resource" path="res://resources/actions/MinaDreamErosion.tres" id="5"]
+
+[resource]
+script = ExtResource("1")
+name = "米娜"
+character_assets = ExtResource("2")
+strength = 3
+intelligence = 13
+agility = 8
+constitution = 4
+luck = 7
+max_hp = 80
+max_mp = 195
+available_actions = Array[ExtResource("1_k5j51")]([ExtResource("3"), ExtResource("4"), ExtResource("5")])

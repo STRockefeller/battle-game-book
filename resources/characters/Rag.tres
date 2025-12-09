@@ -1,0 +1,20 @@
+[gd_resource type="Resource" script_class="Character" load_steps=5 format=3]
+
+[ext_resource type="Script" path="res://scripts/character/Character.gd" id="1"]
+[ext_resource type="Resource" path="res://resources/characters/assets/RagAssets.tres" id="2"]
+[ext_resource type="Resource" path="res://resources/actions/RagLavaPunch.tres" id="3"]
+[ext_resource type="Resource" path="res://resources/actions/RagRockShield.tres" id="4"]
+[ext_resource type="Resource" path="res://resources/actions/RagEarthQuake.tres" id="5"]
+
+[resource]
+script = ExtResource("1")
+name = "雷格"
+character_assets = ExtResource("2")
+strength = 13
+intelligence = 5
+agility = 4
+constitution = 11
+luck = 2
+max_hp = 220
+max_mp = 75
+available_actions = [ExtResource("3"), ExtResource("4"), ExtResource("5")]

@@ -1,0 +1,20 @@
+[gd_resource type="Resource" script_class="Character" load_steps=5 format=3]
+
+[ext_resource type="Script" path="res://scripts/character/Character.gd" id="1"]
+[ext_resource type="Resource" path="res://resources/characters/assets/EliseAssets.tres" id="2"]
+[ext_resource type="Resource" path="res://resources/actions/EliseVineLash.tres" id="3"]
+[ext_resource type="Resource" path="res://resources/actions/EliseElvenArrow.tres" id="4"]
+[ext_resource type="Resource" path="res://resources/actions/EliseNatureHeal.tres" id="5"]
+
+[resource]
+script = ExtResource("1")
+name = "艾莉絲"
+character_assets = ExtResource("2")
+strength = 8
+intelligence = 12
+agility = 10
+constitution = 9
+luck = 6
+max_hp = 180
+max_mp = 180
+available_actions = [ExtResource("3"), ExtResource("4"), ExtResource("5")]
