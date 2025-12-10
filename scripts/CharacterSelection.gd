@@ -7,6 +7,10 @@ extends Control
 @onready var ai_behavior_container = $MainContainer/RightPanel/AIBehaviorContainer
 @onready var confirm_button = $MainContainer/CenterPanel/ConfirmButton
 @onready var back_button = $MainContainer/CenterPanel/BackButton
+@onready var left_title_label = $MainContainer/LeftPanel/LeftTitle
+@onready var right_title_label = $MainContainer/RightPanel/RightTitle
+@onready var ai_behavior_label = $MainContainer/RightPanel/AIBehaviorLabel
+@onready var enemy_character_label = $MainContainer/RightPanel/EnemyCharacterLabel
 
 # 選擇狀態
 var selected_player_character: Character = null
@@ -20,11 +24,20 @@ var character_resources: Array[String] = []
 var ai_behaviors: Array[Dictionary] = []
 
 func _ready():
+	_apply_translations()
 	_scan_character_resources()
 	_load_characters()
 	_load_ai_behaviors()
 	_setup_ai_selection()
 	confirm_button.disabled = true
+
+func _apply_translations():
+	left_title_label.text = tr("character_selection.player_label")
+	confirm_button.text = tr("character_selection.start_battle")
+	back_button.text = tr("character_selection.back")
+	right_title_label.text = tr("character_selection.enemy_section")
+	ai_behavior_label.text = tr("character_selection.ai_label")
+	enemy_character_label.text = tr("character_selection.enemy_character")
 
 ## 動態掃描角色資源目錄
 func _scan_character_resources() -> void:
@@ -91,9 +104,12 @@ func _load_ai_behaviors():
 func _setup_ai_selection():
 	for ai_info in ai_behaviors:
 		var btn = Button.new()
-		btn.text = "%s\n%s" % [ai_info["name"], ai_info["description"]]
+		var name_text := tr(ai_info.get("name_key", ""))
+		var desc_text := tr(ai_info.get("description_key", ""))
+		btn.text = "%s\n%s" % [name_text, desc_text]
 		btn.custom_minimum_size = Vector2(200, 70)
 		btn.toggle_mode = true
+		btn.set_meta("behavior_id", ai_info["id"])
 		
 		if ai_info["id"] == selected_ai_behavior:
 			btn.button_pressed = true
@@ -132,15 +148,7 @@ func _on_ai_behavior_selected(behavior: String):
 	# 更新所有 AI 行為按鈕的狀態
 	for child in ai_behavior_container.get_children():
 		if child is Button:
-			child.button_pressed = false
-	
-	# 找到對應的按鈕並設置為按下
-	for child in ai_behavior_container.get_children():
-		if child is Button:
-			match behavior:
-				"random":
-					if child.text == "隨機選擇":
-						child.button_pressed = true
+			child.button_pressed = child.get_meta("behavior_id", "") == behavior
 
 ## 更新確認按鈕狀態
 func _update_confirm_button():

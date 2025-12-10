@@ -1,0 +1,147 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: BattleGameBook\n"
+"Language: zh_TW\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+
+msgid "main_menu.title"
+msgstr "戰鬥遊戲"
+
+msgid "main_menu.subtitle"
+msgstr "Battle Game Book"
+
+msgid "main_menu.new_game"
+msgstr "開始遊戲"
+
+msgid "main_menu.test_battle"
+msgstr "測試對戰"
+
+msgid "main_menu.settings"
+msgstr "設置"
+
+msgid "main_menu.credits"
+msgstr "製作人員"
+
+msgid "main_menu.exit"
+msgstr "退出遊戲"
+
+msgid "main_menu.version"
+msgstr "版本 {version}"
+
+msgid "character_selection.player_label"
+msgstr "玩家角色"
+
+msgid "character_selection.start_battle"
+msgstr "開始\n對戰"
+
+msgid "character_selection.back"
+msgstr "返回"
+
+msgid "character_selection.enemy_section"
+msgstr "對手設置"
+
+msgid "character_selection.ai_label"
+msgstr "AI 行為"
+
+msgid "character_selection.enemy_character"
+msgstr "對手角色"
+
+msgid "ai.random.name"
+msgstr "隨機 AI"
+
+msgid "ai.random.description"
+msgstr "完全隨機選擇動作，適合測試和新手"
+
+msgid "ai.aggressive.name"
+msgstr "攻擊型 AI"
+
+msgid "ai.aggressive.description"
+msgstr "優先選擇高傷害動作，攻擊性強"
+
+msgid "ai.defensive.name"
+msgstr "防守型 AI"
+
+msgid "ai.defensive.description"
+msgstr "注重生存，優先防禦和恢復動作"
+
+msgid "ai.balanced.name"
+msgstr "平衡型 AI"
+
+msgid "ai.balanced.description"
+msgstr "根據戰況靈活調整策略，攻防兼備"
+
+msgid "battle.placeholder_arena"
+msgstr "【戰鬥場景】"
+
+msgid "battle.action.instruction"
+msgstr "選擇行動"
+
+msgid "battle.action.prompt"
+msgstr "請選擇行動 (第 {turn} 回合)"
+
+msgid "battle.action.cooldown"
+msgstr " - 冷卻 {turns} 回合"
+
+msgid "battle.action.insufficient"
+msgstr " - 資源不足"
+
+msgid "battle.action.button"
+msgstr "{name} (MP: {mp}, STA: {sta}){cooldown}{insufficient}"
+
+msgid "battle.action.tooltip"
+msgstr "MP {current_mp}/{max_mp}, STA {current_sta}/{max_sta}"
+
+msgid "battle.log.turn_start"
+msgstr "第 {turn} 回合開始"
+
+msgid "battle.waiting_choices"
+msgstr "等待所有選擇完成..."
+
+msgid "battle.all_actions_selected"
+msgstr "所有選擇完成，動作執行中..."
+
+msgid "battle.action.use"
+msgstr "{user} 使用了 {action}"
+
+msgid "battle.action.hit"
+msgstr "！命中！造成 {damage} 傷害"
+
+msgid "battle.action.status_applied"
+msgstr "，施加了 {status}"
+
+msgid "battle.action.stance_changed"
+msgstr "，改變了姿態"
+
+msgid "battle.action.miss"
+msgstr "，但沒有命中！"
+
+msgid "battle.log.turn_end"
+msgstr "回合結束"
+
+msgid "battle.end.win_instruction"
+msgstr "戰鬥結束！勝利者是 {winner}！按任意鍵返回主選單..."
+
+msgid "battle.end.win_log"
+msgstr "戰鬥結束！勝利者是 {winner}！"
+
+msgid "battle.end.draw_instruction"
+msgstr "戰鬥結束！平局。按任意鍵返回主選單..."
+
+msgid "battle.end.draw_log"
+msgstr "戰鬥結束！平局"
+
+msgid "battle.status.hp"
+msgstr "HP: {current} / {max}"
+
+msgid "battle.status.mp"
+msgstr "MP: {current} / {max}"
+
+msgid "battle.status.sta"
+msgstr "STA: {current} / {max}"
+
+msgid "battle.status.stance"
+msgstr "姿態: {stance}"
+
+msgid "battle.stance.default"
+msgstr "站立"

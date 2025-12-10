@@ -1,0 +1,147 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: BattleGameBook\n"
+"Language: en\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+msgid "main_menu.title"
+msgstr "Battle Game"
+
+msgid "main_menu.subtitle"
+msgstr "Battle Game Book"
+
+msgid "main_menu.new_game"
+msgstr "New Game"
+
+msgid "main_menu.test_battle"
+msgstr "Test Battle"
+
+msgid "main_menu.settings"
+msgstr "Settings"
+
+msgid "main_menu.credits"
+msgstr "Credits"
+
+msgid "main_menu.exit"
+msgstr "Quit"
+
+msgid "main_menu.version"
+msgstr "Version {version}"
+
+msgid "character_selection.player_label"
+msgstr "Player Character"
+
+msgid "character_selection.start_battle"
+msgstr "Start\nBattle"
+
+msgid "character_selection.back"
+msgstr "Back"
+
+msgid "character_selection.enemy_section"
+msgstr "Opponent Setup"
+
+msgid "character_selection.ai_label"
+msgstr "AI Behavior"
+
+msgid "character_selection.enemy_character"
+msgstr "Opponent Character"
+
+msgid "ai.random.name"
+msgstr "Random AI"
+
+msgid "ai.random.description"
+msgstr "Chooses actions randomly; good for testing or beginners."
+
+msgid "ai.aggressive.name"
+msgstr "Aggressive AI"
+
+msgid "ai.aggressive.description"
+msgstr "Prefers high-damage actions; very aggressive."
+
+msgid "ai.defensive.name"
+msgstr "Defensive AI"
+
+msgid "ai.defensive.description"
+msgstr "Focuses on survival; prioritizes defense and recovery."
+
+msgid "ai.balanced.name"
+msgstr "Balanced AI"
+
+msgid "ai.balanced.description"
+msgstr "Adapts to the fight; balanced offense and defense."
+
+msgid "battle.placeholder_arena"
+msgstr "[Battlefield]"
+
+msgid "battle.action.instruction"
+msgstr "Choose an action"
+
+msgid "battle.action.prompt"
+msgstr "Choose an action (Turn {turn})"
+
+msgid "battle.action.cooldown"
+msgstr " - Cooldown {turns} turn(s)"
+
+msgid "battle.action.insufficient"
+msgstr " - Insufficient resources"
+
+msgid "battle.action.button"
+msgstr "{name} (MP: {mp}, STA: {sta}){cooldown}{insufficient}"
+
+msgid "battle.action.tooltip"
+msgstr "MP {current_mp}/{max_mp}, STA {current_sta}/{max_sta}"
+
+msgid "battle.log.turn_start"
+msgstr "Turn {turn} begins"
+
+msgid "battle.waiting_choices"
+msgstr "Waiting for all choices..."
+
+msgid "battle.all_actions_selected"
+msgstr "Selections locked; executing actions..."
+
+msgid "battle.action.use"
+msgstr "{user} used {action}"
+
+msgid "battle.action.hit"
+msgstr "! Hit! Dealt {damage} damage"
+
+msgid "battle.action.status_applied"
+msgstr ", applied {status}"
+
+msgid "battle.action.stance_changed"
+msgstr ", stance changed"
+
+msgid "battle.action.miss"
+msgstr ", but missed!"
+
+msgid "battle.log.turn_end"
+msgstr "Turn ended"
+
+msgid "battle.end.win_instruction"
+msgstr "Battle over! Winner: {winner}. Press any key to return to main menu..."
+
+msgid "battle.end.win_log"
+msgstr "Battle finished! Winner: {winner}!"
+
+msgid "battle.end.draw_instruction"
+msgstr "Battle over! Draw. Press any key to return to main menu..."
+
+msgid "battle.end.draw_log"
+msgstr "Battle finished! Draw"
+
+msgid "battle.status.hp"
+msgstr "HP: {current} / {max}"
+
+msgid "battle.status.mp"
+msgstr "MP: {current} / {max}"
+
+msgid "battle.status.sta"
+msgstr "STA: {current} / {max}"
+
+msgid "battle.status.stance"
+msgstr "Stance: {stance}"
+
+msgid "battle.stance.default"
+msgstr "Standing"

@@ -26,26 +26,26 @@ static func get_available_ai_types() -> Array[Dictionary]:
 	return [
 		{
 			"id": "random",
-			"name": "隨機 AI",
-			"description": "完全隨機選擇動作，適合測試和新手",
+			"name_key": "ai.random.name",
+			"description_key": "ai.random.description",
 			"difficulty": 1
 		},
 		{
 			"id": "aggressive",
-			"name": "攻擊型 AI",
-			"description": "優先選擇高傷害動作，攻擊性強",
+			"name_key": "ai.aggressive.name",
+			"description_key": "ai.aggressive.description",
 			"difficulty": 3
 		},
 		{
 			"id": "defensive",
-			"name": "防守型 AI",
-			"description": "注重生存，優先防禦和恢復動作",
+			"name_key": "ai.defensive.name",
+			"description_key": "ai.defensive.description",
 			"difficulty": 2
 		},
 		{
 			"id": "balanced",
-			"name": "平衡型 AI",
-			"description": "根據戰況靈活調整策略，攻防兼備",
+			"name_key": "ai.balanced.name",
+			"description_key": "ai.balanced.description",
 			"difficulty": 4
 		}
 	]
