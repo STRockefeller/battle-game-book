@@ -296,71 +296,21 @@ assets/
 
 ---
 
-## 系統實現方針
+## 相關文檔
 
-### 檢查結果
+設計文檔（遊戲規則和機制）：
+- [`Action.md`](./Action.md) - 動作系統參數定義
+- [`Character.md`](./Character.md) - 角色屬性和計算公式
+- [`Stance.md`](./Stance.md) - 姿態機制設計
+- [`StatusEffectSystem.md`](./StatusEffectSystem.md) - 狀態效果機制
+- [`BattleSystemArchitecture.md`](./BattleSystemArchitecture.md) - 對戰架構高層設計
+- [`AISystem.md`](./AISystem.md) - AI 風格和決策邏輯
+- [`AssetManagementSystem.md`](./AssetManagementSystem.md) - 資源組織和 Fallback 機制
+- [`Battle.md`](./Battle.md) - 對戰規則與流程
 
-**✅ Stance 系統 - 程式碼寫死（符合方針）**
+導航：
+- [`INDEX.md`](./INDEX.md) - 文檔索引與設計/開發分離說明
 
-實現方式:
-- `Stance.gd`: 枚舉定義 + 靜態方法
-- `StanceManager.gd`: 實例持有狀態機
-- 無外部資源文件，所有邏輯在 GDScript 中
-
-**⚠️ AI 系統 - 目前程式碼寫死（待改進）**
-
-目前實現:
-```
-scripts/ai/
-├── AIBehavior.gd
-└── RandomAIBehavior.gd + 多個實現
-```
-
-問題:
-1. 新增 AI 需要修改代碼
-2. 字串與類別映射手動維護
-3. 無法在編輯器中調整參數
-4. 擴展性差
-
-### 推薦方案: Resource + GDScript 混合
-
-架構設計:
-```
-resources/ai/
-├── AIRandom.tres
-├── AIAggressive.tres
-├── AIDefensive.tres
-└── AIBalanced.tres
-
-scripts/ai/
-├── AIBehaviorResource.gd (新增)
-├── AIBehavior.gd (重構)
-├── RandomAI.gd (重構)
-├── AggressiveAI.gd (新增)
-├── DefensiveAI.gd (新增)
-└── BalancedAI.gd (新增)
-```
-
-優點:
-- ✅ 在編輯器中配置參數
-- ✅ 代碼邏輯靈活
-- ✅ 易於擴展和測試
-- ✅ 保持型別安全
-- ✅ 動態掃描和加載
-
-### 實施方案比較
-
-| 特性 | 目前方式 | 策略模式 | Resource 混合 | 行為樹 |
-| :--- | :---: | :---: | :---: | :---: |
-| **實現複雜度** | ⭐ | ⭐ | ⭐⭐⭐ | ⭐⭐⭐⭐⭐ |
-| **擴展性** | ❌ | ⭐⭐⭐ | ⭐⭐⭐⭐⭐ | ⭐⭐⭐⭐⭐ |
-| **編輯器支援** | ❌ | ❌ | ✅ | ✅ |
-| **參數可調** | ❌ | ❌ | ✅ | ✅ |
-| **推薦用途** | 原型 | 簡單項目 | **中大型項目** | 大型 AAA |
-
----
-
-## 完整對戰流程實現
 
 ### 已實現的功能
 
@@ -411,36 +361,6 @@ scripts/ai/
 - `_on_turn_ended()` - 回合結束日誌
 - `_on_battle_ended()` - 戰鬥結束
 
-### 待實現
-
-- [ ] 從字符串 ID 加載狀態效果資源
-- [ ] 確定姿態類型並應用
-- [ ] 玩家 vs 玩家 UI 控制
-- [ ] 更複雜的 AI 算法
-- [ ] 戰鬥動畫和視覺效果（部分實現）
-- [ ] 音效系統（部分實現）
-
-### 測試建議
-
-1. 啟動場景應該看到:
-   - 雙方角色狀態面板
-   - 玩家 1 的可用動作按鈕
-   - 動作執行日誌
-   - 自動進行回合
-   - 戰鬥結束提示
-
-2. 測試功能:
-   - 不同角色的屬性計算
-   - 姿態系統對傷害的影響
-   - 狀態效果觸發
-   - AI 行為
-   - 冷卻時間機制
-
 ---
 
-## 相關文檔
-
-- [`BattleSystemArchitecture.md`](./BattleSystemArchitecture.md) - 完整架構文檔
-- [`AssetManagementSystem.md`](./AssetManagementSystem.md) - 資源管理詳解
-- [`AISystem.md`](./AISystem.md) - AI 設計與資源化方案
-- [`Battle.md`](./Battle.md) - 對戰機制設計
+## 完整對戰流程實現

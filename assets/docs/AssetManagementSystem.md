@@ -1,103 +1,167 @@
-# 資源管理系統文檔
+# 資源管理系統設計
 
-## 概述
+## 核心概念
 
-資源管理系統負責載入和管理遊戲中的所有視覺和音頻資源，包括角色精靈圖、動作動畫、音效和特效。系統採用 fallback 機制，當指定資源不存在時會自動使用預設資源，確保遊戲不會因為缺少資源而崩潰。
+資源管理系統負責遊戲中所有視覺和音頻資源的組織與加載。系統採用 **Fallback 機制**，當指定資源不存在時自動使用備用資源，確保遊戲不會因缺少資源而崩潰。
 
-## 核心組件
+## 資源分類
 
-### 1. AssetManager（資源管理器）
+### 視覺資源
 
-**位置**: `scripts/AssetManager.gd`
+- **角色精靈圖**：各角色在不同姿態下的靜態圖像
+  - 待機、攻擊、受擊、防禦、施法、勝利、失敗、低血量待機
+- **動作資源**：攻擊、技能、治療等動作的視覺表現
+- **狀態效果圖示**：中毒、加強、減弱等效果的指示圖標
 
-**功能**:
-- 統一管理所有遊戲資源的載入
-- 支援資源快取，避免重複載入
-- 提供 fallback 機制
-- 單例模式，全域訪問
+### 音頻資源
 
-**主要方法**:
-```gdscript
-# 載入單一資源
-load_asset(path: String, asset_type: AssetType, use_cache: bool = true) -> Resource
+- **角色音效**：攻擊音、受擊音、技能音
+- **環境音效**：戰鬥背景音樂、UI 音效
+- **系統音效**：勝負提示音
 
-# 載入角色精靈圖（帶 fallback 列表）
-load_character_sprite(sprite_path: String, fallback_paths: Array = []) -> Texture2D
+### 特效資源
 
-# 載入音效
-load_audio(audio_path: String, fallback_paths: Array = []) -> AudioStream
+- **動作特效**：技能施放的視覺特效場景
+- **狀態特效**：持續效果的視覺表現
 
-# 載入特效場景
-load_vfx(vfx_path: String, fallback_paths: Array = []) -> PackedScene
+---
 
-# 預載入資源列表
-preload_assets(paths: Array, asset_type: AssetType) -> void
+## 資源組織結構
 
-# 清除快取
-clear_cache() -> void
+```
+assets/
+├── sprites/              # 視覺資源
+│   ├── hero/             # 英雄角色精靈圖
+│   ├── elise/            # 艾莉絲角色精靈圖
+│   ├── actions/          # 動作特效圖像
+│   └── status_icons/     # 狀態效果圖標
+├── audio/               # 音頻資源
+│   ├── hero/            # 英雄音效
+│   ├── elise/           # 艾莉絲音效
+│   ├── actions/         # 動作音效
+│   └── common/          # 通用音效
+└── vfx/                 # 特效資源
+    ├── actions/         # 動作特效場景
+    └── status/          # 狀態特效場景
 ```
 
-**使用範例**:
-```gdscript
-var asset_manager = AssetManager.get_instance()
+---
 
-# 載入角色精靈圖，如果不存在會使用預設資源
-var sprite = asset_manager.load_character_sprite("res://assets/sprites/hero/idle.png")
+## 命名規範
 
-# 載入音效，提供 fallback 路徑
-var audio = asset_manager.load_audio(
-    "res://assets/audio/hero/attack.ogg",
-    ["res://assets/audio/common/attack.ogg"]
-)
+### 精靈圖命名
+
+**格式**：`[character]_[pose].svg`
+
+**示例**：
+- `hero_idle.svg` - 英雄待機
+- `hero_attack.svg` - 英雄攻擊
+- `elise_victory.svg` - 艾莉絲勝利
+
+### 音效命名
+
+**格式**：`[character|action]_[type].ogg`
+
+**示例**：
+- `hero_attack.ogg` - 英雄攻擊音
+- `heal_cast.ogg` - 治療施放音
+
+### 特效命名
+
+**格式**：`[action]_[effect].tscn`
+
+**示例**：
+- `vinelash_cast.tscn` - 藤鞭施法特效
+- `fireball_impact.tscn` - 火球衝擊特效
+
+---
+
+## Fallback 機制
+
+### 優先級順序
+
+```
+指定資源 
+  ↓ (不存在)
+Fallback 列表中的資源
+  ↓ (全部不存在)
+預設資源
+  ↓ (預設資源也不存在)
+空值 (遊戲繼續運行，不會崩潰)
 ```
 
-### 2. CharacterVisualState（角色視覺狀態）
+### 設計優勢
 
-**位置**: `scripts/CharacterVisualState.gd`
+1. **容錯性強**：缺少個別資源不影響遊戲
+2. **漸進式製作**：可先用預設資源作佔位符，後續逐步替換
+3. **快速原型**：美術製作趕不上進度時無阻礙
 
-**功能**:
-- 管理角色的視覺狀態（姿勢、生命值、狀態效果）
-- 根據狀態組合決定應該顯示的資源
-- 支援網路同步的序列化
+### 預設資源示例
 
-**姿勢枚舉**:
-```gdscript
-enum Pose {
-    IDLE,      # 待機
-    ATTACK,    # 攻擊
-    HIT,       # 受擊
-    DEFEND,    # 防禦
-    CAST,      # 施法
-    VICTORY,   # 勝利
-    DEFEAT,    # 失敗
-    LOW_HP     # 低血量待機
-}
-```
+- `assets/sprites/default_character.svg` - 通用角色精靈圖
+- `assets/audio/default_sound.ogg` - 通用音效
+- `assets/vfx/default_effect.tscn` - 簡單白色閃光特效
 
-**主要方法**:
-```gdscript
-# 更新生命值百分比
-update_hp(current_hp: int, max_hp: int) -> void
+---
 
-# 設定姿勢
-set_pose(pose: Pose) -> void
+## 角色視覺狀態
 
-# 添加/移除狀態效果
-add_status_effect(status_id: String) -> void
-remove_status_effect(status_id: String) -> void
+每個角色在不同戰況下的視覺呈現由多個因素組合決定：
 
-# 取得應該顯示的精靈圖路徑（優先級排序）
-get_sprite_paths(base_sprite_paths: Dictionary) -> Array[String]
+### 基本姿勢 (Pose)
 
-# 取得應該播放的音效路徑
-get_audio_paths(base_audio_paths: Dictionary) -> Array[String]
+- **IDLE** - 待機
+- **ATTACK** - 攻擊
+- **HIT** - 受擊
+- **DEFEND** - 防禦
+- **CAST** - 施法
+- **VICTORY** - 勝利
+- **DEFEAT** - 失敗
+- **LOW_HP** - 低血量待機
 
-# 取得狀態效果圖示和特效路徑
-get_status_icon_paths() -> Array[String]
-get_status_vfx_paths() -> Array[String]
+### 狀態效果組合
 
-# 序列化為字典（用於網路同步）
-to_dict() -> Dictionary
+同一姿勢下，不同狀態效果可改變視覺表現：
+- 中毒：綠色光暈疊加
+- 加強：金色光暈疊加
+- 暈眩：視覺模糊疊加
+
+### 血量反映
+
+- 滿血 → 精神煥發的姿勢
+- 中等血 → 標準姿勢
+- 低血 (< 30%) → 傷痕纍纍的姿勢
+
+---
+
+## 實現參考
+
+**完整實現細節參見 DEVELOPMENT_NOTES.md**：
+- AssetManager 單例的載入和快取機制
+- CharacterVisualState 狀態組合邏輯
+- BattleVisualPlayer 動畫協調系統
+- 資源預載入和效能優化
+- 美術資源製作指南
+
+---
+
+## 擴展可能
+
+### 短期
+- 補充各角色的完整精靈圖集
+- 添加音效資源庫
+- 創建基本特效場景
+
+### 中期
+- 動態角色換裝系統
+- 添加更多姿勢變體
+- 狀態效果的持續視覺表現
+
+### 長期
+- 動畫系統集成（2D 骨架動畫）
+- 資源熱加載/卸載
+- 特效編輯器工具
+- 資源壓縮和加密
 static func from_dict(data: Dictionary) -> CharacterVisualState
 ```
 

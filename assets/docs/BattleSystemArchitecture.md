@@ -6,364 +6,140 @@
 
 ## 核心組件
 
-### 1. BattleLogic（無狀態邏輯層）
-位置: `scripts/BattleLogic.gd`
+### 1. 邏輯層 (BattleLogic)
 
-- **職責**: 純計算函數，輸入相同則輸出必定相同
-- **特點**: 無狀態、完全確定性、可用於伺服器驗證和客戶端預測
-- **主要方法**:
-  - `calculate_hit()`: 命中判定
-  - `calculate_damage_result()`: 傷害計算
-  - `calculate_execution_order()`: 執行順序
-  - `validate_action()`: 動作驗證
-  - `is_battle_ended()`: 戰鬥結束檢查
+- **職責**: 純計算函數，決定遊戲規則如何執行
+- **特點**: 無狀態、完全確定性、用於伺服器驗證和客戶端預測
+- **主要計算**:
+  - 命中判定（基於命中率和迴避率）
+  - 傷害計算（攻擊力、防禦力、倍率）
+  - 執行順序（基於敏捷度）
+  - 動作驗證（資源足夠、冷卻檢查、姿態允許）
+  - 戰鬥結束檢查（任一角色血量 ≤ 0）
 
-**使用例**:
-```gdscript
-# 客戶端預測傷害
-var predicted_damage = BattleLogic.calculate_damage_result(atk, def, multiplier)
+**設計特點**：
+- 純函數，沒有副作用
+- 相同輸入必定產生相同輸出
+- 支援單機和多人驗證
 
-# 伺服器驗證動作
-var validation = BattleLogic.validate_action(
-    current_sta, current_mp, max_sta, max_mp,
-    action, cooldowns
-)
-```
-
-### 2. BattleState（狀態序列化層）
-位置: `scripts/BattleState.gd`
+### 2. 狀態層 (BattleState)
 
 - **職責**: 管理對戰狀態的序列化和驗證
-- **特點**: 可轉換為字典，便於網路傳輸；提供狀態簽名用於驗證
-- **主要功能**:
-  - HP/MP/STA 管理
-  - 冷卻追蹤
-  - 序列化/反序列化（to_dict/from_dict）
-  - 狀態哈希用於驗證
+- **內容**: HP/MP/STA、冷卻計時、角色屬性快照
+- **特點**: 可轉換為字典便於網路傳輸、可生成狀態簽名用於驗證
 
-**使用例**:
-```gdscript
-# 建立狀態
-var state = BattleState.new(p1_max_hp, p1_max_mp, p1_max_sta,
-                            p2_max_hp, p2_max_mp, p2_max_sta)
+**設計特點**：
+- 完全序列化，支援發送和保存
+- 提供狀態哈希用於多人同步驗證
 
-# 序列化為字典用於網路傳輸
-var state_dict = state.to_dict()
+### 3. 對戰管理層 (BattleManager)
 
-# 驗證狀態一致性
-var hash = state.calculate_hash()
-```
+- **職責**: 協調整個對戰流程
+- **模式**:
+  - **單機**（BattleManager）：直接控制 AI，無網路
+  - **伺服器**（ServerBattleManager）：驗證、計算、廣播
+  - **客戶端**（ClientBattleManager）：樂觀更新、顯示結果
 
-### 3. BattleManager（基礎對戰管理）
-位置: `scripts/BattleManager.gd`
+**設計特點**：
+- 信號系統通知 UI 層狀態變化
+- 三層架構支援單機→多人的平滑升級
 
-- **職責**: 核心對戰邏輯，管理回合流程和信號
-- **模式**: 單機模式預設
-- **信號**:
-  - `turn_start_selection`: 要求玩家選擇動作
-  - `all_actions_selected`: 所有選擇完成
-  - `action_executed`: 單個動作完成
-  - `turn_ended`: 回合結束
-  - `battle_ended`: 戰鬥結束
+---
 
-**單機使用（現有功能）**:
-```gdscript
-# 場景中的 BattleManager 節點
-battle_manager.start_battle()
+## 對戰流程
 
-# 玩家選擇動作
-battle_manager.player_select_action(action)
-
-# AI 自動決策（內部 _ai_select_action）
-```
-
-### 4. ServerBattleManager（伺服器對戰管理）
-位置: `scripts/ServerBattleManager.gd`
-
-- **繼承**: BattleManager
-- **職責**: 多人遊戲中的伺服器邏輯
-- **關鍵功能**:
-  - 動作驗證（validate_player_action）
-  - 確定性 RNG 管理
-  - 狀態廣播
-
-**多人伺服器使用**:
-```gdscript
-# 初始化
-var battle_manager = ServerBattleManager.new()
-battle_manager.setup_multiplayer(player1_peer_id, player2_peer_id)
-battle_manager.start_battle()
-
-# 接收客戶端動作（來自 RPC）
-func server_player_submit_action(peer_id: int, action_id: String):
-    battle_manager.server_player_submit_action(peer_id, action_id)
-
-# 廣播結果
-battle_manager.broadcast_turn_execution(execution_order, results)
-```
-
-### 5. ClientBattleManager（客戶端對戰管理）
-位置: `scripts/ClientBattleManager.gd`
-
-- **繼承**: BattleManager
-- **職責**: 客戶端的玩家輸入和結果顯示
-- **特點**: 樂觀更新、狀態同步驗證
-
-**多人客戶端使用**:
-```gdscript
-# 初始化
-var battle_manager = ClientBattleManager.new()
-battle_manager.setup_client_connection(local_player_id, server_peer_id)
-battle_manager.start_battle()
-
-# 玩家提交動作（樂觀更新）
-func on_action_button_pressed(action: Action):
-    battle_manager.submit_action_to_server(action)
-
-# 接收伺服器結果（來自 RPC）
-func receive_turn_execution(broadcast_data: Dictionary):
-    battle_manager.receive_turn_execution(broadcast_data)
-```
-
-## 工作流程
-
-### 單機模式
+### 單機模式流程
 
 ```
-┌─────────────────────────────────────────────────┐
-│  BattleManager（單機）                          │
-├─────────────────────────────────────────────────┤
-│                                                 │
-│  1. player_select_action(action)  <- UI 呼叫   │
-│     └→ pending_selections[player1] = action    │
-│                                                 │
-│  2. _ai_select_action()             <- 自動    │
-│     └→ pending_selections[player2] = action    │
-│                                                 │
-│  3. _apply_actions_phase()                      │
-│     └→ BattleLogic 計算結果                     │
-│     └→ 發送 action_executed 信號                │
-│                                                 │
-│  4. _turn_end_phase()                           │
-│     └→ 發送 turn_ended 信號                     │
-│                                                 │
-│  5. begin_round() <- 下一回合                   │
-│                                                 │
-└─────────────────────────────────────────────────┘
+1. 回合開始 → 觸發事件、減少冷卻
+   ↓
+2. 行動選擇 → 玩家和 AI 同時選擇
+   ↓
+3. 結果應用 → 按優先度執行、計算傷害、應用效果
+   ↓
+4. 回合結束 → 檢查戰鬥是否結束
+   ↓
+重複至戰鬥結束
 ```
 
-### 多人模式（伺服器端）
+**關鍵特性**：
+- 同時行動制：雙方同時選擇，根據敏捷度決定實際執行順序
+- AI 自動決策：無需玩家干預
+- 動作效果：傷害、冷卻、狀態效果同時應用
+
+### 多人模式流程（簡化）
 
 ```
-┌──────────────────────────────────────────────────────────┐
-│  ServerBattleManager                                      │
-├──────────────────────────────────────────────────────────┤
-│                                                           │
-│  1. server_player_submit_action(peer_id, action_id)      │
-│     └→ validate_player_action(peer_id, action)           │
-│        └→ BattleLogic.validate_action()                  │
-│     └→ pending_selections[player] = action               │
-│                                                           │
-│  2. 等待雙方都提交（selections_completed >= 2）          │
-│     └→ _all_selections_complete()                        │
-│                                                           │
-│  3. _apply_actions_phase()                               │
-│     └→ _execute_single_action() 使用確定性 RNG           │
-│     └→ 記錄 RNG 種子用於驗證                             │
-│                                                           │
-│  4. broadcast_turn_execution(...)                        │
-│     └→ 發送結果和 RNG 種子給雙方客戶端                   │
-│                                                           │
-│  5. begin_round() <- 下一回合                            │
-│                                                           │
-└──────────────────────────────────────────────────────────┘
+單機邏輯 + 網路層：
+
+1. 玩家提交動作 → 發送到伺服器
+   ↓
+2. 伺服器驗證 + 計算 → 決定結果
+   ↓
+3. 伺服器廣播結果 → 所有客戶端同步
+   ↓
+重複至戰鬥結束
 ```
 
-### 多人模式（客戶端）
+**關鍵特性**：
+- 伺服器計算驗證（反作弊）
+- 客戶端樂觀更新（響應快）
+- 狀態同步驗證（防止差異）
 
-```
-┌──────────────────────────────────────────────────────────┐
-│  ClientBattleManager                                      │
-├──────────────────────────────────────────────────────────┤
-│                                                           │
-│  1. UI 玩家選擇動作                                       │
-│     └→ submit_action_to_server(action)                   │
-│        ├→ 樂觀更新：pending_selections[local] = action   │
-│        └→ RPC 發送到伺服器                               │
-│                                                           │
-│  2. 等待伺服器結果...                                     │
-│                                                           │
-│  3. receive_turn_execution(broadcast_data)               │
-│     ├→ state.from_dict(broadcast_data["state"])          │
-│     ├→ 驗證狀態哈希                                       │
-│     ├→ 發送 turn_ended 信號                               │
-│     └→ UI 播放動畫                                        │
-│                                                           │
-│  4. begin_round() <- 下一回合                            │
-│                                                           │
-└──────────────────────────────────────────────────────────┘
-```
+---
 
-## 使用指南
+---
 
-### 在既有項目中保持單機功能
-
-**現有代碼完全相容：**
-- 場景中的 BattleManager 節點保持不變
-- Battle.gd 的 UI 綁定保持不變
-- 單機遊玩完全正常
-
-```gdscript
-# Battle.gd 中現有代碼無需改動
-@onready var battle_manager: BattleManager = $BattleManager
-
-func _ready():
-    battle_manager.connect("turn_start_selection", Callable(self, "_on_turn_start_selection"))
-    # ... 其他信號連接
-    battle_manager.start_battle()
-```
-
-### 轉換到多人模式
-
-**伺服器端（主機）**:
-```gdscript
-# 將 BattleManager 改為 ServerBattleManager
-@onready var battle_manager: ServerBattleManager = $BattleManager
-
-func _ready():
-    battle_manager.setup_multiplayer(player1_peer, player2_peer)
-    battle_manager.start_battle()
-
-# 設置 RPC 接收
-@rpc("any_peer")
-func server_player_submit_action(peer_id: int, action_id: String):
-    battle_manager.server_player_submit_action(peer_id, action_id)
-```
-
-**客戶端**:
-```gdscript
-# 將 BattleManager 改為 ClientBattleManager
-@onready var battle_manager: ClientBattleManager = $BattleManager
-
-func _ready():
-    battle_manager.setup_client_connection(local_player_id, server_peer_id)
-    battle_manager.start_battle()
-
-# 提交動作
-func _on_action_button_pressed(action: Action):
-    battle_manager.submit_action_to_server(action)
-
-# 接收伺服器結果
-@rpc("authority")
-func receive_turn_execution(broadcast_data: Dictionary):
-    battle_manager.receive_turn_execution(broadcast_data)
-```
-
-## 反作弊機制
+## 反作弊原則
 
 ### 1. 伺服器驗證
-所有關鍵計算都在伺服器執行，客戶端無法修改：
-- 傷害計算
-- 命中判定
-- 冷卻檢查
-- 資源扣除
+
+所有關鍵計算僅在伺服器執行，客戶端無法修改傷害、命中、冷卻和資源扣除。
 
 ### 2. 動作驗證
-客戶端提交的動作必須通過伺服器驗證：
-```gdscript
-# 伺服器端
-var validation = BattleLogic.validate_action(
-    current_sta, current_mp, max_sta, max_mp,
-    action, cooldowns
-)
-if not validation["valid"]:
-    # 拒絕動作
-    return
-```
+
+伺服器驗證每個動作的合法性，拒絕非法動作（資源不足、冷卻未清、姿態不允許）。
 
 ### 3. 狀態簽名
-定期驗證客戶端狀態：
-```gdscript
-# 伺服器
-var server_hash = state.calculate_hash()
-# 客戶端定期發送其狀態哈希
-if not state.verify_hash(client_hash):
-    # 檢測到狀態不一致，強制覆蓋
-    state.from_dict(server_state)
-```
 
-### 4. 確定性 RNG
-使用伺服器種子計數器確保隨機數無法被篡改：
-```gdscript
-# 伺服器廣播 RNG 種子
-broadcast_data["rng_seeds"] = rng_seeds.duplicate()
+定期驗證客戶端狀態與伺服器一致，檢測到差異時強制客戶端同步伺服器狀態。
 
-# 客戶端可驗證計算：
-var result = BattleLogic.calculate_hit_static(acc, eva, seed)
-```
+### 4. 確定性隨機
 
-## 擴展指南
+使用伺服器種子計數器，客戶端無法預測或篡改隨機結果。
 
-### 添加新的對戰模式
+---
 
-創建新的類繼承 BattleManager：
-```gdscript
-# CustomBattleManager.gd
-extends BattleManager
-class_name CustomBattleManager
+## 設計要點
 
-func _ready():
-    battle_mode = "custom"
-    super._ready()
+### 單機 ↔ 多人平滑升級
 
-# 覆寫所需方法
-func _execute_single_action(user, target, action):
-    # 自訂邏輯
-    pass
-```
+架構設計允許從單機逐步擴展到多人而無需大規模重構：
+- 單機：直接使用 BattleManager
+- 多人：替換為 ServerBattleManager/ClientBattleManager
+- 邏輯層完全共享（BattleLogic 用於客戶端預測和伺服器驗證）
 
-### 添加新的計算邏輯
+### 同時行動制遊戲感
 
-在 BattleLogic 中添加靜態方法：
-```gdscript
-# BattleLogic.gd
-static func calculate_custom_effect(base: int, multiplier: float) -> int:
-    return int(base * multiplier)
-```
+雙方同時選擇行動但根據優先度（敏捷度）順序執行，提升策略性：
+- 玩家無法根據對手行動被動應對
+- 優先度系統獎勵敏捷力量分配
 
-### 自訂 AI 行為
+### 信號系統 UI 解耦
 
-現有 AI 系統保持不變，可繼續使用：
-```gdscript
-# AIBehavior 及其子類完全相容
-var ai = AIFactory.create_ai("balanced")
-var action = ai.choose_action(character, available_actions, opponent, battle_manager)
-```
+使用信號讓邏輯層獨立於 UI，便於測試和擴展：
+- `turn_start_selection` - UI 更新可用動作按鈕
+- `action_executed` - UI 播放動作動畫和傷害數字
+- `turn_ended` - UI 記錄戰鬥日誌
+- `battle_ended` - UI 顯示勝負畫面
 
-## 性能考慮
+---
 
-### 網路流量
-- 每回合需要傳輸：玩家選擇（小）+ 完整狀態（中等）
-- 建議：對於 Steam Networking，每秒最多 1 次完整狀態同步
+## 實現參考
 
-### 計算開銷
-- BattleLogic 計算都是 O(n) 複雜度，其中 n = 動作數（通常 ≤ 10）
-- 伺服器端驗證每個動作成本：< 1ms
+**完整實現細節、代碼示例、性能指標參見 DEVELOPMENT_NOTES.md**：
+- BattleLogic、BattleState、BattleManager 的具體實現
+- 單機vs多人模式的集成方式
+- 反作弊機制詳解
+- 擴展指南和最佳實踐
 
-### 內存使用
-- BattleState 對象大小：< 1KB
-- 歷史追蹤（可選）：每回合 + 1KB
-
-## 已知限制和未來改進
-
-### 當前限制
-- RPC 實現需要根據網路框架自行完成
-- 暫無重連機制
-- 暫無回放功能
-
-### 未來改進計劃
-- [ ] 完整的 Steam Networking 集成
-- [ ] 玩家重連和狀態恢復
-- [ ] 戰鬥回放和分析
-- [ ] 表情符號和聲音效果的網路同步
-- [ ] 排行榜和對戰記錄

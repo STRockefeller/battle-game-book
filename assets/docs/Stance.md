@@ -34,71 +34,9 @@
 
 ---
 
-## 系統架構
+## 實現參考
 
-姿態系統由三個主要部分組成：
-
-### 1. Stance.gd - 姿態定義和工具函數
-
-定義所有可能的姿態類型和相關信息，提供靜態方法查詢姿態信息和權限：
-
-```gdscript
-enum Type {
-	STANDING,      # 站立（預設）
-	KNOCKED_DOWN,  # 倒地
-	AIRBORNE,      # 滯空
-	GUARDING       # 防禦
-}
-
-# 靜態方法示例
-Stance.get_name(Stance.Type.GUARDING)  # "防禦"
-Stance.get_description(Stance.Type.KNOCKED_DOWN)  # "被擊倒在地，只能選擇「起身」動作"
-Stance.can_perform_action(Stance.Type.STANDING, "attack")  # true
-```
-
-### 2. StanceManager.gd - 姿態管理
-
-每個 Character 實例持有一個 StanceManager，負責：
-- 追蹤當前姿態和持續時間
-- 管理姿態轉換
-- 提供姿態相關的屬性修正
-- 在每回合結束自動更新持續時間
-
-主要接口：
-
-```gdscript
-# 改變姿態
-stance_manager.change_stance(Stance.Type.GUARDING, 2)  # 防禦 2 回合
-
-# 查詢
-stance_manager.get_current_stance_type()  # Stance.Type
-stance_manager.get_current_stance_name()  # "站立" 等
-stance_manager.is_stance(Stance.Type.STANDING)  # true/false
-stance_manager.can_perform_action("attack")  # true/false
-
-# 屬性修正
-stance_manager.get_stance_stat_modifier("def")  # 50 等
-```
-
-### 3. Character.gd - 整合點
-
-Character 將姿態系統整合到角色系統中，提供便利方法：
-
-```gdscript
-var stance_manager: StanceManager
-
-func change_stance(stance_type: Stance.Type, duration: int = -1)
-func get_current_stance() -> Stance.Type
-func can_perform_action(action_tag: String) -> bool
-func is_stance(stance_type: Stance.Type) -> bool
-```
-
-屬性計算時考慮姿態修正：
-
-```gdscript
-func get_effective_stat(stat: String) -> int:
-	# base_value + effect_modifier + stance_modifier
-```
+**實現細節參見 DEVELOPMENT_NOTES.md**：姿態系統採用三層架構，包括資源定義層（Stance.gd 枚舉和工具函數）、管理層（StanceManager.gd 狀態轉換和屬性修正）和集成層（Character.gd 便利方法）。具體實現涵蓋姿態類型枚舉、動作篩選邏輯、屬性修正規則和信號系統。
 
 ---
 
@@ -226,53 +164,6 @@ func perform_uppercut_attack():
 
 ---
 
-## 擴展姿態
-
-要添加新的姿態類型，需要修改 `Stance.gd`：
-
-### 步驟 1：在枚舉中添加新類型
-
-```gdscript
-enum Type {
-	STANDING,
-	KNOCKED_DOWN,
-	AIRBORNE,
-	GUARDING,
-	CHARGING  # 新姿態：蓄力
-}
-```
-
-### 步驟 2：添加靜態方法支持
-
-```gdscript
-static func get_name(stance_type: Type) -> String:
-	match stance_type:
-		# ...
-		Type.CHARGING:
-			return "蓄力"
-		_:
-			return "未知"
-
-static func can_perform_action(stance_type: Type, action_tag: String) -> bool:
-	match stance_type:
-		# ...
-		Type.CHARGING:
-			return action_tag in ["charge_release", "cancel_charge"]
-```
-
-### 步驟 3：在 StanceManager 中添加屬性修正
-
-```gdscript
-func get_stance_stat_modifier(stat: String) -> int:
-	match current_stance.type:
-		# ...
-		Stance.Type.CHARGING:
-			if stat == "matk":
-				return 100  # 蓄力期間魔法攻擊力翻倍
-```
-
----
-
 ## 常見問題
 
 ### Q：姿態何時自動恢復？
@@ -311,15 +202,4 @@ func _on_stance_changed(old_stance: Stance.Type, new_stance: Stance.Type):
 		Stance.get_name(new_stance)
 	])
 ```
-
----
-
-## 實現檢查清單
-
-- [x] Stance.gd - 姿態枚舉和工具函數
-- [x] StanceManager.gd - 姿態管理系統
-- [x] Character.gd - 集成姿態系統
-- [ ] 在戰鬥系統中集成動作過濾
-- [ ] UI 顯示當前姿態和持續時間
-- [ ] 編寫測試用例
 
