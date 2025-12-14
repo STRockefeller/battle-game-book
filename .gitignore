@@ -1,7 +1,52 @@
-# Godot 4+ specific ignores
+# ============================================
+# Godot 4+ Engine-specific
+# ============================================
 .godot/
-/android/
-*.tmp
-*.svg
+.mono/
+.vs/
+
+# ============================================
+# 資源文件（防止泄露）
+# ============================================
+# 只排除資源，保留導入元數據供開發者使用
+assets/sprites/**/*.svg
+assets/sprites/**/*.png
+assets/sprites/**/*.jpg
+assets/sprites/**/*.jpeg
+assets/audio/**/*.ogg
+assets/audio/**/*.mp3
+assets/audio/**/*.wav
+assets/vfx/**/*.tscn
+!assets/sprites/**/
+!assets/audio/**/
+!assets/vfx/
+
+# ============================================
+# 導入元數據（保留，不排除）
+# ============================================
 *.svg.import
-*.ogg
+*.png.import
+*.jpg.import
+*.jpeg.import
+*.ogg.import
+*.mp3.import
+*.wav.import
+
+# ============================================
+# 臨時與構建
+# ============================================
+*.tmp
+*.bak
+*.translation
+export_credentials.cfg
+/build/
+*.exe
+*.zip
+
+# ============================================
+# IDE & OS 特定
+# ============================================
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
