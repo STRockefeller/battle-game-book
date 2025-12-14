@@ -1,6 +1,6 @@
 # Character.gd
-extends Resource
 class_name Character
+extends Resource
 
 # Basic info
 @export var name: String = ""
@@ -16,8 +16,7 @@ class_name Character
 @export var max_mp: int = 50
 @export var max_stamina: int = 100
 
-# Passive traits and actions
-@export var passive_traits: Array[PassiveTrait] = []
+# Actions (passive traits now selected dynamically at battle start)
 @export var available_actions: Array[Action] = []
 
 # Managers
@@ -61,12 +60,8 @@ func on_turn_end() -> void:
 
 # ==================== Modifiers ====================
 func get_stat_modifier(stat_type: String) -> float:
-    var modifier: float = 0.0
-    for passive_trait in passive_traits:
-        if passive_trait.stat_modifiers.has(stat_type):
-            modifier += passive_trait.stat_modifiers[stat_type]
-    modifier += effect_manager.get_stat_modifier(stat_type)
-    return modifier
+    # 所有效果修正器現在由 BattleManager 通過 effect_manager 管理
+    return effect_manager.get_stat_modifier(stat_type)
 
 func get_damage_bonus_percent() -> float:
     return clamp(get_stat_modifier("damage_bonus") * 100.0, -100.0, 200.0)

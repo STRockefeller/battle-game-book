@@ -1,60 +1,59 @@
-## PassiveTrait.gd
-## 被動特質資源類 - 定義角色的被動加成效果
-extends Resource
+# PassiveTrait.gd
+# 被動特質定義 - 改為純代碼定義，不使用tres資源文件
+
 class_name PassiveTrait
+extends RefCounted
 
-# --- 基本信息 ---
-@export var id: String = ""              # 被動特質的唯一ID
-@export var name: String = ""            # 被動特質的顯示名稱
-@export var description: String = ""     # 被動特質的描述
+## 特質唯一標識
+var id: String = ""
 
-# --- 統計修正 ---
-## 統計修正字典，支援以下鍵值：
-## - "damage_bonus": float (範圍 -1.0 到 2.0，代表 -100% 到 +200%)
-## - "defense_bonus": float (範圍 0.0 到 0.9，代表 0% 到 90%)
-## - "accuracy_bonus": int (範圍 -30 到 +30)
-## - "evasion_bonus": int (範圍 -30 到 +30)
-## - "crit_rate_bonus": float (範圍 0.0 到 0.5，代表 0% 到 50%)
-## - "crit_multiplier_bonus": float (倍率加成，如 0.5 = 150% → 200%)
-@export var stat_modifiers: Dictionary = {}
+## 特質名稱
+var name: String = ""
 
-# --- 效果參數 ---
-## 特質的具體效果參數（如條件、觸發機制等）
-## 不同特質可有不同的 effect_parameters 結構
-@export var effect_parameters: Dictionary = {}
+## 特質描述
+var description: String = ""
 
-# --- 特質分類標籤 ---
-@export var tags: PackedStringArray = []  # 例如: ["damage", "physical", "passive"]
+## 該特質提供的效果列表
+var effects: Array[Effect] = []
 
-# --- 初始化 ---
-func _init(p_id: String = "", p_name: String = "", p_modifiers: Dictionary = {}) -> void:
-	id = p_id
-	name = p_name
-	stat_modifiers = p_modifiers
+## 條件觸發(可為null表示無條件)
+var conditions: Array[EffectCondition] = []
 
-## 複製特質（用於動態應用臨時被動）
-func duplicate_trait() -> PassiveTrait:
-	var new_trait = PassiveTrait.new()
-	new_trait.id = id
-	new_trait.name = name
-	new_trait.description = description
-	new_trait.stat_modifiers = stat_modifiers.duplicate()
-	new_trait.effect_parameters = effect_parameters.duplicate()
-	new_trait.tags = tags.duplicate()
-	return new_trait
+## 不能與哪些特質共存
+var incompatible_trait_ids: Array[String] = []
 
-## 檢查特質是否包含指定標籤
-func has_tag(tag: String) -> bool:
-	return tags.has(tag)
+## 與哪些神明相容(用於推理提示)
+var synergy_deity_ids: Array[String] = []
 
-## 獲取特定統計修正值，如不存在返回 0
-func get_stat_modifier(stat_type: String) -> float:
-	return stat_modifiers.get(stat_type, 0.0)
+## 與哪些神明剋制(用於推理提示)
+var counter_deity_ids: Array[String] = []
+
+func _init(p_id: String = "", p_name: String = "", p_description: String = "") -> void:
+    id = p_id
+    name = p_name
+    description = p_description
+
+## 轉換為效果修正器
+func to_modifier() -> EffectModifier:
+    var modifier = EffectModifier.new(id, "passive", effects)
+    if not conditions.is_empty():
+        modifier.condition = conditions[0]  # 當前支持單條件，可擴展
+    return modifier
+
+## 檢查是否與另一個特質衝突
+func conflicts_with(other_trait: PassiveTrait) -> bool:
+    return other_trait.id in incompatible_trait_ids
+
+func _to_string() -> String:
+    return "PassiveTrait(%s: %s)" % [id, name]
+
+func get_stat_modifier(_stat_type: String) -> float:
+    return 0.0  # PassiveTrait本身不直接提供stat_modifiers，通過effects實現
 
 ## 計算應用後的統計值
 func apply_modifier_to_stat(base_value: float, stat_type: String) -> float:
-	var modifier = get_stat_modifier(stat_type)
-	if stat_type.contains("bonus"):
-		return base_value * (1.0 + modifier)
-	else:
-		return base_value + modifier
+    var modifier = get_stat_modifier(stat_type)
+    if stat_type.contains("bonus"):
+        return base_value * (1.0 + modifier)
+    else:
+        return base_value + modifier

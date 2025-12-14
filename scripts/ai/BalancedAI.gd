@@ -54,7 +54,7 @@ func choose_action(character: Character, available_actions: Array, opponent: Cha
 	return best_action
 
 ## 根據當前狀況決定策略
-func _determine_strategy(hp_ratio: float, stamina_ratio: float, opponent_hp_ratio: float) -> String:
+func _determine_strategy(hp_ratio: float, _stamina_ratio: float, opponent_hp_ratio: float) -> String:
 	# 緊急狀態：血量極低
 	if hp_ratio < 0.15:
 		return "emergency"
