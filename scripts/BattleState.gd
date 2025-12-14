@@ -16,14 +16,14 @@ var max_turns: int = 100
 
 var p1_current_hp: int = 0
 var p1_current_mp: int = 0
-var p1_current_sta: int = 0
+var p1_current_stamina: int = 0
 var p1_stance: int = 0  # Stance.Type enum 值
 
 # ==================== 玩家 2 狀態 ====================
 
 var p2_current_hp: int = 0
 var p2_current_mp: int = 0
-var p2_current_sta: int = 0
+var p2_current_stamina: int = 0
 var p2_stance: int = 0  # Stance.Type enum 值
 
 # ==================== 冷卻管理 ====================
@@ -37,18 +37,18 @@ var p2_cooldowns: Dictionary = {}
 func _init(
 	p1_max_hp: int = 0,
 	p1_max_mp: int = 0,
-	p1_max_sta: int = 0,
+	p1_max_stamina: int = 0,
 	p2_max_hp: int = 0,
 	p2_max_mp: int = 0,
-	p2_max_sta: int = 0
+	p2_max_stamina: int = 0
 ) -> void:
 	p1_current_hp = p1_max_hp
 	p1_current_mp = p1_max_mp
-	p1_current_sta = p1_max_sta
+	p1_current_stamina = p1_max_stamina
 	
 	p2_current_hp = p2_max_hp
 	p2_current_mp = p2_max_mp
-	p2_current_sta = p2_max_sta
+	p2_current_stamina = p2_max_stamina
 	
 	turn = 1
 	max_turns = 100
@@ -63,14 +63,14 @@ func to_dict() -> Dictionary:
 		"p1": {
 			"hp": p1_current_hp,
 			"mp": p1_current_mp,
-			"sta": p1_current_sta,
+			"stamina": p1_current_stamina,
 			"stance": p1_stance,
 			"cooldowns": p1_cooldowns.duplicate()
 		},
 		"p2": {
 			"hp": p2_current_hp,
 			"mp": p2_current_mp,
-			"sta": p2_current_sta,
+			"stamina": p2_current_stamina,
 			"stance": p2_stance,
 			"cooldowns": p2_cooldowns.duplicate()
 		}
@@ -85,7 +85,7 @@ func from_dict(data: Dictionary) -> void:
 		var p1_data = data["p1"]
 		p1_current_hp = p1_data.get("hp", 0)
 		p1_current_mp = p1_data.get("mp", 0)
-		p1_current_sta = p1_data.get("sta", 0)
+		p1_current_stamina = p1_data.get("stamina", p1_data.get("sta", 0))
 		p1_stance = p1_data.get("stance", 0)
 		p1_cooldowns = p1_data.get("cooldowns", {}).duplicate()
 	
@@ -93,7 +93,7 @@ func from_dict(data: Dictionary) -> void:
 		var p2_data = data["p2"]
 		p2_current_hp = p2_data.get("hp", 0)
 		p2_current_mp = p2_data.get("mp", 0)
-		p2_current_sta = p2_data.get("sta", 0)
+		p2_current_stamina = p2_data.get("stamina", p2_data.get("sta", 0))
 		p2_stance = p2_data.get("stance", 0)
 		p2_cooldowns = p2_data.get("cooldowns", {}).duplicate()
 
@@ -104,7 +104,7 @@ func get_p1_state() -> Dictionary:
 	return {
 		"hp": p1_current_hp,
 		"mp": p1_current_mp,
-		"sta": p1_current_sta,
+		"stamina": p1_current_stamina,
 		"stance": p1_stance,
 		"cooldowns": p1_cooldowns
 	}
@@ -114,7 +114,7 @@ func get_p2_state() -> Dictionary:
 	return {
 		"hp": p2_current_hp,
 		"mp": p2_current_mp,
-		"sta": p2_current_sta,
+		"stamina": p2_current_stamina,
 		"stance": p2_stance,
 		"cooldowns": p2_cooldowns
 	}
@@ -126,25 +126,25 @@ func get_player_state(player_id: int) -> Dictionary:
 # ==================== 狀態修改 ====================
 
 ## 更新玩家 1 狀態
-func set_p1_state(hp: int, mp: int, sta: int, stance: int) -> void:
+func set_p1_state(hp: int, mp: int, stamina: int, stance: int) -> void:
 	p1_current_hp = hp
 	p1_current_mp = mp
-	p1_current_sta = sta
+	p1_current_stamina = stamina
 	p1_stance = stance
 
 ## 更新玩家 2 狀態
-func set_p2_state(hp: int, mp: int, sta: int, stance: int) -> void:
+func set_p2_state(hp: int, mp: int, stamina: int, stance: int) -> void:
 	p2_current_hp = hp
 	p2_current_mp = mp
-	p2_current_sta = sta
+	p2_current_stamina = stamina
 	p2_stance = stance
 
 ## 更新玩家狀態（1 或 2）
-func set_player_state(player_id: int, hp: int, mp: int, sta: int, stance: int) -> void:
+func set_player_state(player_id: int, hp: int, mp: int, stamina: int, stance: int) -> void:
 	if player_id == 1:
-		set_p1_state(hp, mp, sta, stance)
+		set_p1_state(hp, mp, stamina, stance)
 	else:
-		set_p2_state(hp, mp, sta, stance)
+		set_p2_state(hp, mp, stamina, stance)
 
 # ==================== 冷卻管理 ====================
 
@@ -173,8 +173,8 @@ func get_player_cooldowns(player_id: int) -> Dictionary:
 func calculate_hash() -> String:
 	var state_str = "%d_%d_%d_%d_%d_%d_%d_%d_%d_%d_%d_%d" % [
 		turn,
-		p1_current_hp, p1_current_mp, p1_current_sta, p1_stance,
-		p2_current_hp, p2_current_mp, p2_current_sta, p2_stance,
+		p1_current_hp, p1_current_mp, p1_current_stamina, p1_stance,
+		p2_current_hp, p2_current_mp, p2_current_stamina, p2_stance,
 		p1_cooldowns.size(),
 		p2_cooldowns.size(),
 		max_turns

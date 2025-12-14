@@ -6,7 +6,7 @@ class_name DefensiveAI
 # 低血量閾值
 const LOW_HP_THRESHOLD = 0.3
 const CRITICAL_HP_THRESHOLD = 0.15
-const LOW_STA_THRESHOLD = 0.25
+const LOW_STAMINA_THRESHOLD = 0.25
 
 func choose_action(character: Character, available_actions: Array, opponent: Character, battle_manager: BattleManager) -> Action:
 	if available_actions.size() == 0:
@@ -19,7 +19,7 @@ func choose_action(character: Character, available_actions: Array, opponent: Cha
 		return _find_lowest_cost_action(available_actions)
 	
 	var hp_ratio = get_hp_ratio(character, battle_manager)
-	var sta_ratio = get_sta_ratio(character, battle_manager)
+	var stamina_ratio = get_stamina_ratio(character, battle_manager)
 	
 	# 緊急狀況：極低血量時優先防禦
 	if hp_ratio < CRITICAL_HP_THRESHOLD:
@@ -34,7 +34,7 @@ func choose_action(character: Character, available_actions: Array, opponent: Cha
 			return heal_action
 	
 	# 低耐力時休息
-	if sta_ratio < LOW_STA_THRESHOLD:
+	if stamina_ratio < LOW_STAMINA_THRESHOLD:
 		var rest_action = _find_action_with_tag(affordable_actions, "rest")
 		if rest_action:
 			return rest_action
@@ -55,14 +55,14 @@ func evaluate_action(action: Action, character: Character, opponent: Character, 
 	var score: float = 0.0
 	
 	var hp_ratio = get_hp_ratio(character, battle_manager)
-	var sta_ratio = get_sta_ratio(character, battle_manager)
+	var stamina_ratio = get_stamina_ratio(character, battle_manager)
 	
 	# 1. 優先低消耗動作
 	score += (20.0 - action.cost_stamina) * 3.0
 	score += (30.0 - action.cost_mp) * 2.0
 	
 	# 2. 高命中率加成（不想浪費資源）
-	score += action.accuracy_modifier * 25.0
+	score += action.accuracy * 0.5
 	
 	# 3. 防禦和支援動作大幅加成
 	if "guard" in action.tags:
@@ -71,7 +71,7 @@ func evaluate_action(action: Action, character: Character, opponent: Character, 
 			score += 30.0  # 低血量時更重視防禦
 	
 	if "rest" in action.tags:
-		if sta_ratio < LOW_STA_THRESHOLD:
+		if stamina_ratio < LOW_STAMINA_THRESHOLD:
 			score += 50.0  # 低耐力時極度需要
 		else:
 			score += 20.0
@@ -86,12 +86,11 @@ func evaluate_action(action: Action, character: Character, opponent: Character, 
 		score += 30.0
 	
 	# 4. 傷害適中即可（不是重點）
-	score += action.base_damage * 5.0
-	score += action.damage_multiplier * 8.0
+	score += action.damage * 5.0
 	
 	# 5. 狀態效果評估（偏好防禦性的）
-	if action.status_effects.size() > 0:
-		for effect_id in action.status_effects:
+	if action.effects_on_hit.size() > 0:
+		for effect_id in action.effects_on_hit:
 			if effect_id in ["regen"]:
 				score += 25.0  # 再生很好
 			elif effect_id in ["burning", "poison"]:
@@ -99,11 +98,11 @@ func evaluate_action(action: Action, character: Character, opponent: Character, 
 			elif effect_id == "weakness":
 				score += 15.0  # 削弱敵人
 	
-	# 6. 懲罰高風險動作
-	if action.accuracy_modifier < 0:
+	# 6. 懲罰高風險動作（低命中率）
+	if action.accuracy < 70.0:
 		score -= 30.0  # 不喜歡低命中率
 	
-	if "physical" in action.tags and action.base_damage > 15:
+	if "physical" in action.tags and action.damage > 15:
 		score -= 10.0  # 高傷害通常高風險
 	
 	# 7. 血量越低越保守

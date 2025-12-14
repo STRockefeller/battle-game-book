@@ -2,7 +2,8 @@
 # 負責管理角色的所有狀態效果。
 # 處理應用、移除、更新、觸發等邏輯。
 
-class_name StatusEffectManager extends Node
+extends Node
+class_name StatusEffectManager
 
 # 持有此管理器的角色
 var character: Character

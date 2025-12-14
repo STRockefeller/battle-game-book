@@ -39,10 +39,10 @@ func get_mp_ratio(character: Character, battle_manager: BattleManager) -> float:
 	return float(current_mp) / float(character.max_mp) if character.max_mp > 0 else 0.0
 
 ## 獲取角色當前耐力比例 (0.0 - 1.0)
-func get_sta_ratio(character: Character, battle_manager: BattleManager) -> float:
-	var max_sta = character.constitution * 8
-	var current_sta = battle_manager.get_current_sta(character)
-	return float(current_sta) / float(max_sta) if max_sta > 0 else 0.0
+func get_stamina_ratio(character: Character, battle_manager: BattleManager) -> float:
+	var max_stamina = character.max_stamina
+	var current_stamina = battle_manager.get_current_stamina(character)
+	return float(current_stamina) / float(max_stamina) if max_stamina > 0 else 0.0
 
 ## 獲取對手血量比例 (0.0 - 1.0)
 func get_opponent_hp_ratio(opponent: Character, battle_manager: BattleManager) -> float:
@@ -50,11 +50,11 @@ func get_opponent_hp_ratio(opponent: Character, battle_manager: BattleManager) -
 
 ## 檢查動作是否可以使用（資源足夠且不在冷卻中）
 func can_afford_action(action: Action, character: Character, battle_manager: BattleManager) -> bool:
-	var current_sta = battle_manager.get_current_sta(character)
+	var current_stamina = battle_manager.get_current_stamina(character)
 	var current_mp = battle_manager.get_current_mp(character)
 	
 	# 檢查資源
-	if current_sta < action.cost_stamina or current_mp < action.cost_mp:
+	if current_stamina < action.cost_stamina or current_mp < action.cost_mp:
 		return false
 	
 	# 檢查冷卻

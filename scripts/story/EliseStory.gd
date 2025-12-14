@@ -1,7 +1,8 @@
 # EliseStory.gd
 # Elise 的故事數據資源類
 
-class_name EliseStory extends Resource
+class_name EliseStory
+extends Resource
 
 # ==================== 角色信息 ====================
 

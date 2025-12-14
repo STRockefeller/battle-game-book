@@ -51,7 +51,7 @@ func validate_player_action(peer_id: int, action: Action) -> Dictionary:
 	
 	# 取得當前冷卻和資源
 	var cooldowns = _get_player_cooldowns(player)
-	var current_sta = get_current_sta(player)
+	var current_stamina = get_current_stamina(player)
 	var current_mp = get_current_mp(player)
 	
 	# 使用 BattleLogic 驗證動作（直接調用靜態方法）
@@ -66,14 +66,14 @@ func validate_player_action(peer_id: int, action: Action) -> Dictionary:
 		validation_result["errors"].append("Action is on cooldown")
 	
 	# 檢查資源
-	if current_sta < action.cost_stamina or current_mp < action.cost_mp:
+	if current_stamina < action.cost_stamina or current_mp < action.cost_mp:
 		validation_result["valid"] = false
 		validation_result["errors"].append("Insufficient resources")
 	
 	# 檢查 HP（健全性檢查）
-	if current_sta < 0 or current_sta > player.max_sta:
+	if current_stamina < 0 or current_stamina > player.max_stamina:
 		validation_result["valid"] = false
-		validation_result["errors"].append("Invalid STA state")
+		validation_result["errors"].append("Invalid stamina state")
 	if current_mp < 0 or current_mp > player.max_mp:
 		validation_result["valid"] = false
 		validation_result["errors"].append("Invalid MP state")
@@ -152,14 +152,9 @@ func broadcast_turn_execution(execution_order: Array, results: Array) -> void:
 # ==================== 覆寫執行邏輯以支援確定性計算 ====================
 
 ## 覆寫命中判定以使用確定性 RNG
-func _roll_hit(accuracy: float, evasion: float) -> bool:
-	var hit_chance = accuracy - evasion
-	hit_chance = clamp(hit_chance, 5, 95)
-	
+func _roll_hit(action_accuracy: float, accuracy_bonus: int) -> bool:
 	# 使用確定性種子執行計算
-	var rng = RandomNumberGenerator.new()
-	rng.seed = rng_seed_counter
-	var result = rng.randf() * 100 < hit_chance
+	var result = BattleLogic.calculate_hit_static(action_accuracy, accuracy_bonus, rng_seed_counter)
 	
 	rng_seeds.append(rng_seed_counter)
 	rng_seed_counter += 1

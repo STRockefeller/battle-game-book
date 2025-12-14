@@ -2,7 +2,8 @@
 # 純資源類，只儲存靜態數據。不包含任何遊戲邏輯。
 # 具體效果邏輯由 StatusEffectManager 和 StatusEffectHandlers 負責。
 
-class_name StatusEffect extends Resource
+extends Resource
+class_name StatusEffect
 
 # ==================== 基本信息 ====================
 

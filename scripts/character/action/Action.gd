@@ -16,8 +16,15 @@ class_name Action
 # --- 成本 ---
 @export var cost_stamina: int = 0
 @export var cost_mp: int = 0 
-@export var cast_time: int = 0
 @export var cooldown: int = 0
+
+# --- 固定傷害與命中值（新系統）---
+@export var damage: int = 0              # 固定傷害值
+@export var accuracy: float = 100.0      # 基礎命中率 (%)
+@export var critical_rate: float = 0.0   # 基礎爆擊率 (%)
+
+# --- 距離相關 ---
+@export var accuracy_by_range: Dictionary = {}  # { "near": 95.0, "mid": 85.0, "far": 60.0 }
 
 # --- 姿態限制 ---
 @export var allowed_stances: PackedStringArray = []
@@ -26,16 +33,6 @@ class_name Action
 # --- 標籤與分類 ---
 @export var tags: PackedStringArray = []
 @export var is_movement: bool = false
-
-# --- 傷害計算  ---
-@export var damage_multiplier: float = 0.0
-@export var power: int = 10 
-@export var accuracy_modifier: float = 0.0
-@export var critical_modifier: float = 0.0
-
-# --- 距離與範圍 ---
-@export var applicable_ranges: PackedStringArray = []
-@export var out_of_range_penalty: Dictionary = {}
 
 # --- 效果 ---
 @export var effects_on_hit: PackedStringArray = []
@@ -54,7 +51,7 @@ func can_use(user: Character, battle_manager: BattleManager = null) -> bool:
 	
 	# 使用 cost_mp 或 cost_stamina
 	var cost = cost_stamina if cost_stamina > 0 else cost_mp
-	if battle_manager.get_sta(user) < cost:
+	if battle_manager.get_current_stamina(user) < cost:
 		return false
 	
 	# 檢查冷卻時間
@@ -68,3 +65,9 @@ func is_usable_in(current_stance_id: String) -> bool:
 	if allowed_stances.size() > 0:
 		return allowed_stances.has(current_stance_id)
 	return not disallowed_stances.has(current_stance_id)
+
+## 獲取指定距離的命中率（如無則返回基礎命中率）
+func get_accuracy_at_range(range_type: String) -> float:
+	if accuracy_by_range.has(range_type):
+		return accuracy_by_range[range_type]
+	return accuracy

@@ -73,22 +73,17 @@ func _ready():
 	
 	characters = [player1, player2]
 	
-	# 確保所有角色的計算屬性已更新
-	for character in characters:
-		if character:
-			character.calculate_base_stats()
-	
 	# 初始化戰鬥狀態
 	var BattleStateClass = load("res://scripts/BattleState.gd")
 	state = BattleStateClass.new(
-		player1.max_hp, player1.max_mp, player1.max_sta,
-		player2.max_hp, player2.max_mp, player2.max_sta
+		player1.max_hp, player1.max_mp, player1.max_stamina,
+		player2.max_hp, player2.max_mp, player2.max_stamina
 	)
 	
 	# 驗證初始化
 	print("[BattleManager] 戰鬥初始化完成 (模式: %s)" % battle_mode)
-	print("  Player1: %s - HP=%d, MP=%d, STA=%d" % [player1.name, get_current_hp(player1), get_current_mp(player1), get_current_sta(player1)])
-	print("  Player2: %s - HP=%d, MP=%d, STA=%d" % [player2.name, get_current_hp(player2), get_current_mp(player2), get_current_sta(player2)])
+	print("  Player1: %s - HP=%d, MP=%d, Stamina=%d" % [player1.name, get_current_hp(player1), get_current_mp(player1), get_current_stamina(player1)])
+	print("  Player2: %s - HP=%d, MP=%d, Stamina=%d" % [player2.name, get_current_hp(player2), get_current_mp(player2), get_current_stamina(player2)])
 	
 	# 設置 StatusEffectHandlers 的 battle_manager 引用
 	StatusEffectHandlers.battle_manager = self
@@ -254,22 +249,22 @@ func _execute_single_action(user: Character, target: Character, action: Action):
 	# 2. 檢查資源成本
 	var cost_stamina = action.cost_stamina if action.cost_stamina > 0 else 0
 	var cost_mp = action.cost_mp if action.cost_mp > 0 else 0
-	var current_sta = get_current_sta(user)
+	var current_stamina = get_current_stamina(user)
 	var current_mp = get_current_mp(user)
 	
-	print("  [資源檢查] STA: %d/%d (成本%d), MP: %d/%d (成本%d)" % [current_sta, user.max_sta, cost_stamina, current_mp, user.max_mp, cost_mp])
+	print("  [資源檢查] Stamina: %d/%d (成本%d), MP: %d/%d (成本%d)" % [current_stamina, user.max_stamina, cost_stamina, current_mp, user.max_mp, cost_mp])
 	
-	if current_sta < cost_stamina or current_mp < cost_mp:
+	if current_stamina < cost_stamina or current_mp < cost_mp:
 		print("  [資源不足] 動作執行失敗 - 返回")
 		action_executed.emit(user, target, action, result)
 		return
 	
 	# 3. 扣除資源
-	var new_sta = current_sta - cost_stamina
+	var new_stamina = current_stamina - cost_stamina
 	var new_mp = current_mp - cost_mp
-	set_current_sta(user, new_sta)
+	set_current_stamina(user, new_stamina)
 	set_current_mp(user, new_mp)
-	print("  [資源扣除] STA: %d→%d, MP: %d→%d" % [current_sta, get_current_sta(user), current_mp, get_current_mp(user)])
+	print("  [資源扣除] Stamina: %d→%d, MP: %d→%d" % [current_stamina, get_current_stamina(user), current_mp, get_current_mp(user)])
 	
 	# 4. 計算命中
 	# 格擋動作（包含 "guard" 標籤）自動成功
@@ -277,22 +272,29 @@ func _execute_single_action(user: Character, target: Character, action: Action):
 		result["hit"] = true
 		print("  [格擋] 自動成功")
 	else:
-		var accuracy = user.get_effective_stat("acc") + action.accuracy_modifier
-		var evasion = target.get_effective_stat("eva")
-		result["hit"] = _roll_hit(accuracy, evasion)
-		print("  [命中判定] %s → %s: 命中=%d, 迴避=%d, 判定=%s" % [user.name, target.name, int(accuracy), int(evasion), result["hit"]])
+		var accuracy = action.get_accuracy_at_range(current_distance)
+		var accuracy_bonus = user.get_accuracy_bonus()
+		result["hit"] = _roll_hit(accuracy, accuracy_bonus)
+		print("  [命中判定] %s → %s: 基礎命中=%s%%, 加成=%d, 判定=%s" % [user.name, target.name, accuracy, accuracy_bonus, result["hit"]])
 	
 	if result["hit"]:
-		# 5. 計算傷害
-		var base_damage = user.get_effective_stat("atk") * action.damage_multiplier
-		var target_def = target.get_effective_stat("def")
-		result["damage"] = base_damage
+		# 5. 計算傷害（簡化後的系統：固定傷害 × 被動加成 × (1 - 減傷)）
+		var damage_bonus_percent = user.get_damage_bonus_percent()
+		var defense_reduction_percent = target.get_defense_reduction_percent()
+		result["damage"] = action.damage
+		result["actual_damage"] = BattleLogic.calculate_damage_result(action.damage, damage_bonus_percent, defense_reduction_percent)
 		
-		if base_damage <= 0.0:
-			# 非攻擊動作（如 Guard）不應造成傷害
-			result["actual_damage"] = 0
-		else:
-			result["actual_damage"] = max(1, int(base_damage) - int(target_def))
+		print("  [傷害計算] 基礎=%d, 傷害加成=%.0f%%, 減傷=%.0f%%, 最終=%d" % [action.damage, damage_bonus_percent, defense_reduction_percent, result["actual_damage"]])
+		
+		if action.damage > 0:
+			# 計算爆擊
+			var crit_rate = action.critical_rate + user.get_crit_rate_bonus_percent()
+			result["is_critical"] = randf() * 100 < crit_rate
+			
+			if result["is_critical"]:
+				result["actual_damage"] = BattleLogic.calculate_critical_damage(result["actual_damage"], 1.5)
+				print("  [爆擊!] 傷害提升至 %d" % result["actual_damage"])
+			
 			# 應用傷害
 			var current_hp = get_current_hp(target)
 			set_current_hp(target, current_hp - result["actual_damage"])
@@ -328,9 +330,9 @@ func _execute_single_action(user: Character, target: Character, action: Action):
 	
 	# 9. 特殊動作效果（如恢復體力）
 	if "rest" in action.tags:
-		var sta_restore = 20
-		set_current_sta(user, get_current_sta(user) + sta_restore)
-		print("  [恢復體力] %s 恢復了 %d 體力" % [user.name, sta_restore])
+		var stamina_restore = 20
+		set_current_stamina(user, get_current_stamina(user) + stamina_restore)
+		print("  [恢復體力] %s 恢復了 %d 體力" % [user.name, stamina_restore])
 	
 	# 10. 設置冷卻
 	if action.cooldown > 0:
@@ -424,9 +426,9 @@ func get_action_state(character: Character, action: Action) -> Dictionary:
 
 	var cost_stamina: int = max(action.cost_stamina, 0)
 	var cost_mp: int = max(action.cost_mp, 0)
-	var current_sta: int = get_current_sta(character)
+	var current_stamina: int = get_current_stamina(character)
 	var current_mp: int = get_current_mp(character)
-	var insufficient: bool = current_sta < cost_stamina or current_mp < cost_mp
+	var insufficient: bool = current_stamina < cost_stamina or current_mp < cost_mp
 
 	return {
 		"cooldown": cooldown_remaining,
@@ -434,15 +436,13 @@ func get_action_state(character: Character, action: Action) -> Dictionary:
 		"disabled": cooldown_remaining > 0 or insufficient,
 		"cost_stamina": cost_stamina,
 		"cost_mp": cost_mp,
-		"current_sta": current_sta,
+		"current_stamina": current_stamina,
 		"current_mp": current_mp
 	}
 
 ## 命中判定
-func _roll_hit(accuracy: float, evasion: float) -> bool:
-	var hit_chance = accuracy - evasion
-	hit_chance = clamp(hit_chance, 5, 95)  # 保證至少有 5% 命中和迴避機率
-	return randf() * 100 < hit_chance
+func _roll_hit(action_accuracy: float, accuracy_bonus: int) -> bool:
+	return BattleLogic.calculate_hit_static(action_accuracy, accuracy_bonus)
 
 # ==================== 狀態管理方法 ====================
 
@@ -478,21 +478,21 @@ func set_current_mp(character: Character, value: int) -> void:
 	else:
 		state.p2_current_mp = clamped
 
-## 獲取角色當前 STA
-func get_current_sta(character: Character) -> int:
+## 獲取角色當前 Stamina
+func get_current_stamina(character: Character) -> int:
 	if character == player1:
-		return state.p1_current_sta
+		return state.p1_current_stamina
 	else:
-		return state.p2_current_sta
+		return state.p2_current_stamina
 
-## 設置角色當前 STA
-func set_current_sta(character: Character, value: int) -> void:
-	var max_sta = character.max_sta
-	var clamped = clamp(value, 0, max_sta)
+## 設置角色當前 Stamina
+func set_current_stamina(character: Character, value: int) -> void:
+	var max_stamina = character.max_stamina
+	var clamped = clamp(value, 0, max_stamina)
 	if character == player1:
-		state.p1_current_sta = clamped
+		state.p1_current_stamina = clamped
 	else:
-		state.p2_current_sta = clamped
+		state.p2_current_stamina = clamped
 
 # ==================== 輔助方法 ====================
 

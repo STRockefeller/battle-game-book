@@ -20,14 +20,14 @@ var p2_sprite: Sprite2D = null
 @onready var p1_name_label = $MainContainer/CharacterStatusPanel/Player1Panel/MarginContainer/VBoxContainer/NameLabel
 @onready var p1_hp_label = $MainContainer/CharacterStatusPanel/Player1Panel/MarginContainer/VBoxContainer/HpLabel
 @onready var p1_mp_label = $MainContainer/CharacterStatusPanel/Player1Panel/MarginContainer/VBoxContainer/MpLabel
-@onready var p1_sta_label = $MainContainer/CharacterStatusPanel/Player1Panel/MarginContainer/VBoxContainer/StaLabel
+@onready var p1_stamina_label = $MainContainer/CharacterStatusPanel/Player1Panel/MarginContainer/VBoxContainer/StaLabel
 @onready var p1_stance_label = $MainContainer/CharacterStatusPanel/Player1Panel/MarginContainer/VBoxContainer/StanceLabel
 
 # 玩家 2 UI 節點
 @onready var p2_name_label = $MainContainer/CharacterStatusPanel/Player2Panel/MarginContainer/VBoxContainer/NameLabel
 @onready var p2_hp_label = $MainContainer/CharacterStatusPanel/Player2Panel/MarginContainer/VBoxContainer/HpLabel
 @onready var p2_mp_label = $MainContainer/CharacterStatusPanel/Player2Panel/MarginContainer/VBoxContainer/MpLabel
-@onready var p2_sta_label = $MainContainer/CharacterStatusPanel/Player2Panel/MarginContainer/VBoxContainer/StaLabel
+@onready var p2_stamina_label = $MainContainer/CharacterStatusPanel/Player2Panel/MarginContainer/VBoxContainer/StaLabel
 @onready var p2_stance_label = $MainContainer/CharacterStatusPanel/Player2Panel/MarginContainer/VBoxContainer/StanceLabel
 
 # 戰鬥日誌和操作面板
@@ -117,7 +117,7 @@ func update_character_status(character: Character, is_player1: bool):
 	var name_label = p1_name_label if is_player1 else p2_name_label
 	var hp_label = p1_hp_label if is_player1 else p2_hp_label
 	var mp_label = p1_mp_label if is_player1 else p2_mp_label
-	var sta_label = p1_sta_label if is_player1 else p2_sta_label
+	var stamina_label = p1_stamina_label if is_player1 else p2_stamina_label
 	var stance_label = p1_stance_label if is_player1 else p2_stance_label
 	
 	# 從後端數據更新 UI（從 BattleManager 獲取暫時值）
@@ -125,7 +125,7 @@ func update_character_status(character: Character, is_player1: bool):
 	var current_hp = battle_manager.get_current_hp(character)
 	hp_label.text = tr("battle.status.hp").format({"current": current_hp, "max": character.max_hp})
 	mp_label.text = tr("battle.status.mp").format({"current": battle_manager.get_current_mp(character), "max": character.max_mp})
-	sta_label.text = tr("battle.status.sta").format({"current": battle_manager.get_current_sta(character), "max": character.max_sta})
+	stamina_label.text = tr("battle.status.stamina").format({"current": battle_manager.get_current_stamina(character), "max": character.max_stamina})
 	
 	# 從 stance_manager 取得當前姿態
 	var stance_name = tr("battle.stance.default")
@@ -149,10 +149,10 @@ func _update_character_sprites() -> void:
 		visual_player.play_idle(p2_sprite, p2_visual_state, battle_manager.player2.character_assets)
 
 func _apply_status_colors() -> void:
-	var p1_labels = [p1_name_label, p1_hp_label, p1_mp_label, p1_sta_label, p1_stance_label]
+	var p1_labels = [p1_name_label, p1_hp_label, p1_mp_label, p1_stamina_label, p1_stance_label]
 	for label in p1_labels:
 		label.add_theme_color_override("font_color", Color(P1_COLOR))
-	var p2_labels = [p2_name_label, p2_hp_label, p2_mp_label, p2_sta_label, p2_stance_label]
+	var p2_labels = [p2_name_label, p2_hp_label, p2_mp_label, p2_stamina_label, p2_stance_label]
 	for label in p2_labels:
 		label.add_theme_color_override("font_color", Color(P2_COLOR))
 
@@ -189,7 +189,7 @@ func _on_turn_start_selection(player1: Character, _player2: Character):
 		btn.text = tr("battle.action.button").format({
 			"name": action.name,
 			"mp": action.cost_mp,
-			"sta": action.cost_stamina,
+			"stamina": action.cost_stamina,
 			"cooldown": cooldown_text,
 			"insufficient": insufficient_text
 		})
@@ -197,8 +197,8 @@ func _on_turn_start_selection(player1: Character, _player2: Character):
 		btn.tooltip_text = tr("battle.action.tooltip").format({
 			"current_mp": state["current_mp"],
 			"max_mp": player1.max_mp,
-			"current_sta": state["current_sta"],
-			"max_sta": player1.max_sta
+			"current_stamina": state["current_stamina"],
+			"max_stamina": player1.max_stamina
 		})
 		btn.connect("pressed", Callable(self, "_on_action_selected").bind(action))
 		moves_container.add_child(btn)

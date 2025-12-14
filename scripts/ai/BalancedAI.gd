@@ -6,7 +6,7 @@ class_name BalancedAI
 # 狀態閾值
 const AGGRESSIVE_HP_THRESHOLD = 0.6 # 高於此值時偏攻擊
 const DEFENSIVE_HP_THRESHOLD = 0.3 # 低於此值時偏防守
-const LOW_STA_THRESHOLD = 0.25
+const LOW_STAMINA_THRESHOLD = 0.25
 
 func choose_action(character: Character, available_actions: Array, opponent: Character, battle_manager: BattleManager) -> Action:
 	if available_actions.size() == 0:
@@ -19,11 +19,11 @@ func choose_action(character: Character, available_actions: Array, opponent: Cha
 		return _find_lowest_cost_action(available_actions)
 	
 	var hp_ratio = get_hp_ratio(character, battle_manager)
-	var sta_ratio = get_sta_ratio(character, battle_manager)
+	var stamina_ratio = get_stamina_ratio(character, battle_manager)
 	var opponent_hp_ratio = get_opponent_hp_ratio(opponent, battle_manager)
 	
 	# 動態決定當前策略
-	var strategy = _determine_strategy(hp_ratio, sta_ratio, opponent_hp_ratio)
+	var strategy = _determine_strategy(hp_ratio, stamina_ratio, opponent_hp_ratio)
 	
 	# 緊急處理
 	if strategy == "emergency":
@@ -36,7 +36,7 @@ func choose_action(character: Character, available_actions: Array, opponent: Cha
 			return heal_action
 	
 	# 低耐力時休息
-	if sta_ratio < LOW_STA_THRESHOLD:
+	if stamina_ratio < LOW_STAMINA_THRESHOLD:
 		var rest_action = _find_action_with_tag(affordable_actions, "rest")
 		if rest_action:
 			return rest_action
@@ -54,7 +54,7 @@ func choose_action(character: Character, available_actions: Array, opponent: Cha
 	return best_action
 
 ## 根據當前狀況決定策略
-func _determine_strategy(hp_ratio: float, _sta_ratio: float, opponent_hp_ratio: float) -> String:
+func _determine_strategy(hp_ratio: float, stamina_ratio: float, opponent_hp_ratio: float) -> String:
 	# 緊急狀態：血量極低
 	if hp_ratio < 0.15:
 		return "emergency"
@@ -78,9 +78,9 @@ func evaluate_action(action: Action, character: Character, opponent: Character, 
 	var score: float = 0.0
 	
 	var hp_ratio = get_hp_ratio(character, battle_manager)
-	var sta_ratio = get_sta_ratio(character, battle_manager)
+	var stamina_ratio = get_stamina_ratio(character, battle_manager)
 	var opponent_hp_ratio = get_opponent_hp_ratio(opponent, battle_manager)
-	var strategy = _determine_strategy(hp_ratio, sta_ratio, opponent_hp_ratio)
+	var strategy = _determine_strategy(hp_ratio, stamina_ratio, opponent_hp_ratio)
 	
 	# 基礎評分
 	score += _evaluate_base_damage(action)
@@ -106,24 +106,23 @@ func evaluate_action(action: Action, character: Character, opponent: Character, 
 
 ## 評估基礎傷害
 func _evaluate_base_damage(action: Action) -> float:
-	return action.base_damage * 10.0 + action.damage_multiplier * 15.0
+	return action.damage * 10.0
 
 ## 評估命中率
 func _evaluate_hit_rate(action: Action) -> float:
-	return action.accuracy_modifier * 12.0
+	return action.accuracy * 0.5
 
 ## 評估性價比
 func _evaluate_cost_efficiency(action: Action) -> float:
 	var total_cost = action.cost_stamina + action.cost_mp
 	if total_cost == 0:
 		return 20.0
-	var damage = action.base_damage * action.damage_multiplier
-	return (damage / total_cost) * 5.0
+	return (float(action.damage) / float(total_cost)) * 5.0
 
 ## 評估狀態效果
 func _evaluate_status_effects(action: Action) -> float:
 	var score = 0.0
-	for effect_id in action.status_effects:
+	for effect_id in action.effects_on_hit:
 		match effect_id:
 			"burning", "poison":
 				score += 12.0
@@ -172,7 +171,7 @@ func _apply_defensive_modifiers(base_score: float, action: Action, _character: C
 		score *= 1.3
 	
 	# 高命中率加成
-	if action.accuracy_modifier >= 0:
+	if action.accuracy >= 85.0:
 		score *= 1.2
 	
 	return score
@@ -182,18 +181,18 @@ func _apply_balanced_modifiers(base_score: float, action: Action, _character: Ch
 	var score = base_score
 	
 	# 中等傷害動作加成
-	if action.base_damage >= 8 and action.base_damage <= 15:
+	if action.damage >= 8 and action.damage <= 15:
 		score *= 1.2
 	
 	# 性價比高的動作加成
 	var total_cost = action.cost_stamina + action.cost_mp
 	if total_cost > 0:
-		var efficiency = (action.base_damage * action.damage_multiplier) / total_cost
+		var efficiency = float(action.damage) / float(total_cost)
 		if efficiency > 1.0:
 			score *= 1.15
 	
 	# 命中率穩定加成
-	if action.accuracy_modifier >= 0:
+	if action.accuracy >= 85.0:
 		score += 15.0
 	
 	return score

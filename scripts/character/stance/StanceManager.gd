@@ -1,6 +1,7 @@
 # StanceManager.gd
 # 負責管理角色的姿態系統
 
+extends Node
 class_name StanceManager
 
 # 持有此管理器的角色

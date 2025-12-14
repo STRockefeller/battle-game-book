@@ -1,6 +1,7 @@
 # Stance.gd
 # 姿態系統 - 定義所有角色可能的姿態
 
+extends Resource
 class_name Stance
 
 # ==================== 姿態枚舉 ====================
@@ -26,7 +27,7 @@ func _init(p_type: Type = Type.STANDING, duration: int = -1) -> void:
 # ==================== 靜態方法 - 獲取姿態信息 ====================
 
 ## 獲取姿態的名稱
-static func get_name(stance_type: Type) -> String:
+static func get_stance_name(stance_type: Type) -> String:
 	match stance_type:
 		Type.STANDING:
 			return "站立"
