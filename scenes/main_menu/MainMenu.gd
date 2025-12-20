@@ -30,7 +30,7 @@ func _on_new_game_pressed():
 
 func _on_test_battle_pressed():
 	# 切換到角色選擇場景
-	get_tree().change_scene_to_file("res://scenes/CharacterSelection.tscn")
+	get_tree().change_scene_to_file("res://scenes/character_selection/CharacterSelection.tscn")
 
 func _on_settings_pressed():
 	print("設置 - 功能待實現")

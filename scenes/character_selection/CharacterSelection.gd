@@ -167,8 +167,8 @@ func _on_confirm_pressed():
 	)
 	
 	# 切換到戰鬥場景
-	get_tree().change_scene_to_file("res://scenes/BattleUI.tscn")
+	get_tree().change_scene_to_file("res://scenes/battle/BattleUI.tscn")
 
 ## 返回主選單
 func _on_back_pressed():
-	get_tree().change_scene_to_file("res://scenes/MainMenu.tscn")
+	get_tree().change_scene_to_file("res://scenes/main_menu/MainMenu.tscn")
