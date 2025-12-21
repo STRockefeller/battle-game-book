@@ -7,7 +7,7 @@ class_name CharacterAssets
 
 # --- 精靈圖資源 ---
 @export_group("Sprites")
-@export var sprite_idle: String = ""
+@export var sprite_idle: String = "res://assets/sprites/characters/no_face/portrait_nb.png"
 @export var sprite_attack: String = ""
 @export var sprite_hit: String = ""
 @export var sprite_defend: String = ""
