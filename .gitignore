@@ -42,6 +42,7 @@ export_credentials.cfg
 /build/
 *.exe
 *.zip
+todo.md
 
 # ============================================
 # IDE & OS 特定
