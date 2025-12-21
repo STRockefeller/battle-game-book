@@ -16,6 +16,11 @@ class_name CharacterAssets
 @export var sprite_defeat: String = ""
 @export var sprite_low_hp: String = ""
 
+# --- 縮放設定 ---
+@export_group("Scale")
+@export var auto_scale_enabled: bool = true
+@export var target_sprite_height: float = 200.0  # 目標高度（像素）
+
 # --- 音效資源 ---
 @export_group("Audio")
 @export var audio_attack: String = ""

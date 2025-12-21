@@ -155,12 +155,30 @@ func _update_character_sprite(sprite: Sprite2D, visual_state: CharacterVisualSta
 		var texture = asset_manager.load_asset(path, AssetManager.AssetType.SPRITE)
 		if texture != null and texture is Texture2D:
 			sprite.texture = texture
+			# 應用自動縮放
+			_apply_auto_scale(sprite, texture, character_assets)
 			return
 	
 	# 如果所有路徑都失敗，使用預設精靈圖
 	var default_texture = asset_manager.load_asset("", AssetManager.AssetType.SPRITE)
 	if default_texture != null:
 		sprite.texture = default_texture
+		_apply_auto_scale(sprite, default_texture, character_assets)
+
+## 根據圖片大小自動計算並應用縮放
+func _apply_auto_scale(sprite: Sprite2D, texture: Texture2D, character_assets) -> void:
+	if not character_assets.auto_scale_enabled:
+		sprite.scale = Vector2.ONE
+		return
+	
+	# 取得圖片的原始大小
+	var texture_size = texture.get_size()
+	if texture_size.y <= 0:
+		return
+	
+	# 計算縮放比例：根據目標高度 vs 實際高度
+	var scale_ratio = character_assets.target_sprite_height / texture_size.y
+	sprite.scale = Vector2(scale_ratio, scale_ratio)
 
 ## 播放音效
 func _play_audio(audio_path: String) -> void:

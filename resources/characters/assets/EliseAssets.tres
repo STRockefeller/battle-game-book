@@ -4,7 +4,7 @@
 
 [resource]
 script = ExtResource("1")
-sprite_idle = "res://assets/sprites/elise/idle.svg"
+sprite_idle = "res://assets/sprites/characters/no_face/portrait_nb.png"
 sprite_attack = "res://assets/sprites/elise/attack.svg"
 sprite_hit = "res://assets/sprites/elise/hit.svg"
 sprite_defend = "res://assets/sprites/default_character.svg"
