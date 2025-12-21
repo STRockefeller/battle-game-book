@@ -19,3 +19,8 @@ config/icon="res://icon.svg"
 
 BattleConfig="*res://scripts/BattleConfig.gd"
 Localization="*res://scripts/Localization.gd"
+
+[display]
+
+window/size/viewport_width=1920
+window/size/viewport_height=1080
