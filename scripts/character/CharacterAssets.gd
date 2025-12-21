@@ -16,6 +16,8 @@ class_name CharacterAssets
 @export var sprite_defeat: String = ""
 @export var sprite_low_hp: String = ""
 
+@export var sprite_selection: String = "res://assets/sprites/characters/no_face/selection.png"
+
 # --- 縮放設定 ---
 @export_group("Scale")
 @export var auto_scale_enabled: bool = true
