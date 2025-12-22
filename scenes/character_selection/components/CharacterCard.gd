@@ -15,7 +15,7 @@ func set_character(value: Character) -> void:
 	var display_name := ""
 
 	if value != null:
-		display_name = value.name
+		display_name = value.get_display_name()
 		if value.character_assets:
 			sprite_path = value.character_assets.sprite_selection
 

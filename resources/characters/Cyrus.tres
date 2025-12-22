@@ -8,7 +8,10 @@
 
 [resource]
 script = ExtResource("1")
-name = "賽勒斯"
+name_translations = {
+"zh_TW": "賽勒斯",
+"en": "Cyrus"
+}
 character_assets = ExtResource("2")
 strength = 11
 intelligence = 8

@@ -3,7 +3,10 @@ class_name Character
 extends Resource
 
 # Basic info
-@export var name: String = ""
+@export var name_translations: Dictionary = {
+	"zh_TW": "未命名",
+	"en": "Unnamed"
+}
 
 # Visual resources
 @export var character_assets: CharacterAssets = null
@@ -87,10 +90,17 @@ func get_effective_stat(stat_type: String) -> float:
 
 # ==================== HP helpers ====================
 func take_damage(damage: int) -> void:
-    print("%s 受到 %d 傷害" % [name, damage])
+    print("%s 受到 %d 傷害" % [get_display_name(), damage])
 
 func heal(amount: int) -> void:
-    print("%s 恢復 %d 生命值" % [name, amount])
+    print("%s 恢復 %d 生命值" % [get_display_name(), amount])
 
 func is_alive(current_hp: int) -> bool:
     return current_hp > 0
+
+# ==================== Localization ====================
+func get_display_name() -> String:
+    var locale = TranslationServer.get_locale()
+    if name_translations.has(locale):
+        return name_translations[locale]
+    return name_translations.get("zh_TW", "未命名")

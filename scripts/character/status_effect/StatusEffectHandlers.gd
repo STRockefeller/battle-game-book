@@ -35,7 +35,7 @@ static func _trigger_poison(character: Character, effect: StatusEffect) -> void:
 	var damage = effect.effect_parameters.get("damage_per_turn", 1) as int
 	var current_hp = battle_manager.get_current_hp(character)
 	battle_manager.set_current_hp(character, current_hp - damage)
-	print("%s 受到中毒傷害: %d HP" % [character.name, damage])
+	print("%s 受到中毒傷害: %d HP" % [character.get_display_name(), damage])
 
 ## 燃燒 - 每回合造成傷害
 static func _trigger_burning(character: Character, effect: StatusEffect) -> void:
@@ -44,18 +44,18 @@ static func _trigger_burning(character: Character, effect: StatusEffect) -> void
 	var damage = effect.effect_parameters.get("damage_per_turn", 2) as int
 	var current_hp = battle_manager.get_current_hp(character)
 	battle_manager.set_current_hp(character, current_hp - damage)
-	print("%s 被燃燒傷害: %d HP" % [character.name, damage])
+	print("%s 被燃燒傷害: %d HP" % [character.get_display_name(), damage])
 
 ## 虛弱 - 純屬性修正，不需要特殊觸發邏輯
 static func _trigger_weakness(character: Character, _effect: StatusEffect) -> void:
 	# 虛弱只通過 stat_modifiers 修正屬性，不需要回合觸發邏輯
-	print("%s 處於虛弱狀態" % character.name)
+	print("%s 處於虛弱狀態" % character.get_display_name())
 
 ## 眩暈 - 導致角色無法行動
 static func _trigger_stun(character: Character, _effect: StatusEffect) -> void:
 	# 這裡可能需要與戰鬥系統整合
 	# 例如：禁止角色在本回合選擇動作
-	print("%s 被眩暈，無法行動" % character.name)
+	print("%s 被眩暈，無法行動" % character.get_display_name())
 
 ## 再生 - 每回合恢復生命值
 static func _trigger_regen(character: Character, effect: StatusEffect) -> void:
@@ -64,7 +64,7 @@ static func _trigger_regen(character: Character, effect: StatusEffect) -> void:
 	var recovery = effect.effect_parameters.get("recovery_per_turn", 5) as int
 	var current_hp = battle_manager.get_current_hp(character)
 	battle_manager.set_current_hp(character, current_hp + recovery)
-	print("%s 恢復生命值: %d HP" % [character.name, recovery])
+	print("%s 恢復生命值: %d HP" % [character.get_display_name(), recovery])
 
 # ==================== 輔助函數 ====================
 

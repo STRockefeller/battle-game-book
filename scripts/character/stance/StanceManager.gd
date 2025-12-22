@@ -31,7 +31,7 @@ func change_stance(new_type: Stance.Type, duration: int = -1) -> void:
 	
 	var old_name = _get_stance_name(old_stance_type)
 	var new_name = _get_stance_name(new_type)
-	print("%s 的姿態改變: %s → %s" % [character.name, old_name, new_name])
+	print("%s 的姿態改變: %s → %s" % [character.get_display_name(), old_name, new_name])
 	
 	# 發出信號
 	stance_changed.emit(old_stance_type, new_type)
@@ -148,7 +148,7 @@ func on_turn_end() -> void:
 	# 如果姿態已過期，恢復到站立
 	if current_stance.is_expired():
 		var stance_name = _get_stance_name(current_stance.type)
-		print("%s 的「%s」狀態已結束，恢復站立" % [character.name, stance_name])
+		print("%s 的「%s」狀態已結束，恢復站立" % [character.get_display_name(), stance_name])
 		reset_to_standing()
 
 # ==================== 姿態特殊效果 ====================
