@@ -1,9 +1,9 @@
 extends Control
 class_name CharacterDisplayPanel
 
-@onready var portrait_rect: TextureRect = $Panel/VBox/Portrait
-@onready var name_label: Label = $Panel/VBox/Name
-@onready var title_label: Label = $Panel/VBox/Title
+@onready var portrait_rect: TextureRect = $Panel/Portrait
+@onready var name_label: Label = $Panel/Name
+@onready var title_label: Label = $Panel/Title
 
 const DEFAULT_SPRITE: String = "res://assets/sprites/characters/no_face/selection.png"
 const DEFAULT_NAME: String = "???"
@@ -19,7 +19,7 @@ func set_character(character: Character) -> void:
 	var display_name := DEFAULT_NAME
 
 	if character != null:
-		display_name = character.name
+		display_name = character.get_display_name()
 		if character.character_assets:
 			sprite_path = character.character_assets.sprite_selection
 

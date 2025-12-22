@@ -77,11 +77,11 @@ func _initialize_visual_system() -> void:
 	
 	# 初始化角色視覺狀態
 	if battle_manager.player1:
-		p1_visual_state = CharacterVisualState.new(battle_manager.player1.name)
+		p1_visual_state = CharacterVisualState.new(battle_manager.player1.get_display_name())
 		p1_visual_state.update_hp(battle_manager.get_current_hp(battle_manager.player1), battle_manager.player1.max_hp)
 	
 	if battle_manager.player2:
-		p2_visual_state = CharacterVisualState.new(battle_manager.player2.name)
+		p2_visual_state = CharacterVisualState.new(battle_manager.player2.get_display_name())
 		p2_visual_state.update_hp(battle_manager.get_current_hp(battle_manager.player2), battle_manager.player2.max_hp)
 	
 	# 創建角色精靈節點
@@ -121,7 +121,7 @@ func update_character_status(character: Character, is_player1: bool):
 	var stance_label = p1_stance_label if is_player1 else p2_stance_label
 	
 	# 從後端數據更新 UI（從 BattleManager 獲取暫時值）
-	name_label.text = character.name
+	name_label.text = character.get_display_name()
 	var current_hp = battle_manager.get_current_hp(character)
 	hp_label.text = tr("battle.status.hp").format({"current": current_hp, "max": character.max_hp})
 	mp_label.text = tr("battle.status.mp").format({"current": battle_manager.get_current_mp(character), "max": character.max_mp})
@@ -222,7 +222,7 @@ func _on_all_actions_selected():
 
 ## 動作執行
 func _on_action_executed(user: Character, target: Character, action: Action, result: Dictionary):
-	var log_message = tr("battle.action.use").format({"user": user.name, "action": action.name})
+	var log_message = tr("battle.action.use").format({"user": user.get_display_name(), "action": action.name})
 	var color = _color_for_character(user)
 	
 	# 播放動作動畫
@@ -281,8 +281,8 @@ func _on_battle_ended(winner: Character):
 		child.queue_free()
 	
 	if winner:
-		instruction_label.text = tr("battle.end.win_instruction").format({"winner": winner.name})
-		add_log_entry(tr("battle.end.win_log").format({"winner": winner.name}), "gold")
+		instruction_label.text = tr("battle.end.win_instruction").format({"winner": winner.get_display_name()})
+		add_log_entry(tr("battle.end.win_log").format({"winner": winner.get_display_name()}), "gold")
 		
 		# 播放勝利/失敗動畫
 		var is_winner_p1 = (winner == battle_manager.player1)

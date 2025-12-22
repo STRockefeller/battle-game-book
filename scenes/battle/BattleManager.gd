@@ -82,8 +82,8 @@ func _ready():
 	
 	# 驗證初始化
 	print("[BattleManager] 戰鬥初始化完成 (模式: %s)" % battle_mode)
-	print("  Player1: %s - HP=%d, MP=%d, Stamina=%d" % [player1.name, get_current_hp(player1), get_current_mp(player1), get_current_stamina(player1)])
-	print("  Player2: %s - HP=%d, MP=%d, Stamina=%d" % [player2.name, get_current_hp(player2), get_current_mp(player2), get_current_stamina(player2)])
+	print("  Player1: %s - HP=%d, MP=%d, Stamina=%d" % [player1.get_display_name(), get_current_hp(player1), get_current_mp(player1), get_current_stamina(player1)])
+	print("  Player2: %s - HP=%d, MP=%d, Stamina=%d" % [player2.get_display_name(), get_current_hp(player2), get_current_mp(player2), get_current_stamina(player2)])
 	
 	# 設置 StatusEffectHandlers 的 battle_manager 引用
 	StatusEffectHandlers.battle_manager = self
@@ -237,7 +237,7 @@ func _execute_single_action(user: Character, target: Character, action: Action):
 		"stance_changed": false
 	}
 	
-	print("[_execute_single_action] %s 使用 %s | 檢查資源成本" % [user.name, action.name])
+	print("[_execute_single_action] %s 使用 %s | 檢查資源成本" % [user.get_display_name(), action.name])
 	
 	# 1. 檢查冷卻
 	var cooldowns = _get_player_cooldowns(user)
@@ -275,7 +275,7 @@ func _execute_single_action(user: Character, target: Character, action: Action):
 		var accuracy = action.get_accuracy_at_range(current_distance)
 		var accuracy_bonus = user.get_accuracy_bonus()
 		result["hit"] = _roll_hit(accuracy, accuracy_bonus)
-		print("  [命中判定] %s → %s: 基礎命中=%s%%, 加成=%d, 判定=%s" % [user.name, target.name, accuracy, accuracy_bonus, result["hit"]])
+		print("  [命中判定] %s → %s: 基礎命中=%s%%, 加成=%d, 判定=%s" % [user.get_display_name(), target.get_display_name(), accuracy, accuracy_bonus, result["hit"]])
 	
 	if result["hit"]:
 		# 5. 計算傷害（簡化後的系統：固定傷害 × 被動加成 × (1 - 減傷)）
@@ -306,7 +306,7 @@ func _execute_single_action(user: Character, target: Character, action: Action):
 				if effect_resource:
 					target.apply_effect(effect_resource)
 					result["status_applied"] = effect_id
-					print("  [狀態效果] 對 %s 施加了 %s" % [target.name, effect_id])
+					print("  [狀態效果] 對 %s 施加了 %s" % [target.get_display_name(), effect_id])
 				else:
 					print("  [警告] 無法加載狀態效果: %s" % effect_id)
 		
@@ -317,7 +317,7 @@ func _execute_single_action(user: Character, target: Character, action: Action):
 				target.change_stance(stance_type, -1)
 				result["stance_changed"] = true
 				_update_player_stance(target, stance_type)
-				print("  [姿態變更] %s 變更為 %s" % [target.name, action.target_stance_change_to])
+				print("  [姿態變更] %s 變更為 %s" % [target.get_display_name(), action.target_stance_change_to])
 	
 	# 8. 使用者姿態變更（用於起身等自身動作）
 	if action.user_stance_change_to != "":
@@ -326,13 +326,13 @@ func _execute_single_action(user: Character, target: Character, action: Action):
 			user.change_stance(stance_type, -1)
 			result["stance_changed"] = true
 			_update_player_stance(user, stance_type)
-			print("  [姿態變更] %s 變更為 %s" % [user.name, action.user_stance_change_to])
+			print("  [姿態變更] %s 變更為 %s" % [user.get_display_name(), action.user_stance_change_to])
 	
 	# 9. 特殊動作效果（如恢復體力）
 	if "rest" in action.tags:
 		var stamina_restore = 20
 		set_current_stamina(user, get_current_stamina(user) + stamina_restore)
-		print("  [恢復體力] %s 恢復了 %d 體力" % [user.name, stamina_restore])
+		print("  [恢復體力] %s 恢復了 %d 體力" % [user.get_display_name(), stamina_restore])
 	
 	# 10. 設置冷卻
 	if action.cooldown > 0:
