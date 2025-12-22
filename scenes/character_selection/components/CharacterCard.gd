@@ -1,11 +1,11 @@
 extends Control
 class_name CharacterCard
 
-@onready var portrait_rect: TextureRect = $Panel/VBox/Portrait
-@onready var name_label: Label = $Panel/VBox/Name
+@onready var portrait_rect: TextureRect = $Panel/Portrait
+@onready var name_label: Label = $Panel/Name
 @onready var panel: Panel = $Panel
 
-const DEFAULT_SPRITE: String = "res://assets/sprites/characters/no_face/selection.png"
+const DEFAULT_SPRITE: String = "res://assets/sprites/characters/no_face/card.png"
 
 var character: Character = null
 
@@ -17,7 +17,7 @@ func set_character(value: Character) -> void:
 	if value != null:
 		display_name = value.get_display_name()
 		if value.character_assets:
-			sprite_path = value.character_assets.sprite_selection
+			sprite_path = value.character_assets.sprite_card
 
 	portrait_rect.texture = AssetManager.get_instance().load_character_sprite(sprite_path)
 	name_label.text = display_name

@@ -17,6 +17,8 @@ class_name CharacterAssets
 @export var sprite_low_hp: String = ""
 
 @export var sprite_selection: String = "res://assets/sprites/characters/no_face/selection.png"
+# 512*768
+@export var sprite_card: String = "res://assets/sprites/characters/no_face/card.png"
 
 # --- 縮放設定 ---
 @export_group("Scale")
