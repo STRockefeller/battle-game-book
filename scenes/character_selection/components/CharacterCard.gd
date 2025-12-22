@@ -25,6 +25,6 @@ func set_character(value: Character) -> void:
 func set_slot_state(scale_value: float, alpha_value: float, highlighted: bool) -> void:
 	scale = Vector2(scale_value, scale_value)
 	modulate = Color(1, 1, 1, alpha_value)
-	panel.modulate = Color(1, 1, 1, 0.2) if not highlighted else Color(1, 1, 1, 0.35)
+	panel.modulate = Color(1, 1, 1, 0.8) if not highlighted else Color(1, 1, 1, 1)
 	var font_color := Color(1, 1, 1, 1) if highlighted else Color(0.85, 0.85, 0.85, 1)
 	name_label.add_theme_color_override("font_color", font_color)
