@@ -27,8 +27,8 @@ class_name Action
 @export var accuracy_by_range: Dictionary = {}  # { "near": 95.0, "mid": 85.0, "far": 60.0 }
 
 # --- 姿態限制 ---
-@export var allowed_stances: PackedStringArray = []
-@export var disallowed_stances: PackedStringArray = []
+@export var allowed_stances: Array[Stance.Type] = []
+@export var disallowed_stances: Array[Stance.Type] = []
 
 # --- 標籤與分類 ---
 @export var tags: PackedStringArray = []
@@ -61,10 +61,10 @@ func can_use(user: Character, battle_manager: BattleManager = null) -> bool:
 	
 	return true
 
-func is_usable_in(current_stance_id: String) -> bool:
+func is_usable_in(current_stance_type: Stance.Type) -> bool:
 	if allowed_stances.size() > 0:
-		return allowed_stances.has(current_stance_id)
-	return not disallowed_stances.has(current_stance_id)
+		return allowed_stances.has(current_stance_type)
+	return not disallowed_stances.has(current_stance_type)
 
 ## 獲取指定距離的命中率（如無則返回基礎命中率）
 func get_accuracy_at_range(range_type: String) -> float:
