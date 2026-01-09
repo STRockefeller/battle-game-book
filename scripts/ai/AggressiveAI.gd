@@ -54,8 +54,8 @@ func evaluate_action(action: Action, character: Character, opponent: Character, 
 			elif effect_id == "weakness":
 				score += 10.0  # 降低敵人攻擊
 	
-	# 6. 擊倒加成
-	if action.target_stance_change_to == "knocked_down":
+	# 6. 擊倒加成（若會改變對手姿態為倒地）
+	if action.target_stance_change_enabled and action.target_stance_change_to == Stance.Type.KNOCKED_DOWN:
 		score += 30.0  # 擊倒非常有價值
 	
 	# 7. 低血量時稍微保守（但仍然攻擊導向）

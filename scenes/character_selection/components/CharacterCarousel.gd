@@ -147,8 +147,8 @@ func _apply_layout() -> void:
 func _wrap_index(value: int) -> int:
 	if characters.is_empty():
 		return 0
-	var size := characters.size()
-	return int(((value % size) + size) % size)
+	var char_count := characters.size()
+	return int(((value % char_count) + char_count) % char_count)
 
 func _get_layout_definition(count: int) -> Dictionary:
 	match count:

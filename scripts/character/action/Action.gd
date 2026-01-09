@@ -37,8 +37,11 @@ class_name Action
 # --- 效果 ---
 @export var effects_on_hit: PackedStringArray = []
 @export var effects_on_use: PackedStringArray = []
-@export var target_stance_change_to: String = ""
-@export var user_stance_change_to: String = ""
+## 姿態變更設定：使用啟用旗標 + 目標姿態型別
+@export var target_stance_change_enabled: bool = false
+@export var target_stance_change_to: Stance.Type = Stance.Type.STANDING
+@export var user_stance_change_enabled: bool = false
+@export var user_stance_change_to: Stance.Type = Stance.Type.STANDING
 
 @export var priority: int = 0  # 行動優先度
 

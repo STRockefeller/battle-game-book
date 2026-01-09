@@ -310,23 +310,21 @@ func _execute_single_action(user: Character, target: Character, action: Action):
 				else:
 					print("  [警告] 無法加載狀態效果: %s" % effect_id)
 		
-		# 7. 改變姿態
-		if action.target_stance_change_to != "":
-			var stance_type = _parse_stance_type(action.target_stance_change_to)
-			if stance_type != null:
-				target.change_stance(stance_type, -1)
-				result["stance_changed"] = true
-				_update_player_stance(target, stance_type)
-				print("  [姿態變更] %s 變更為 %s" % [target.get_display_name(), action.target_stance_change_to])
+		# 7. 改變姿態（目標）
+		if action.target_stance_change_enabled:
+			var stance_type: Stance.Type = action.target_stance_change_to
+			target.change_stance(stance_type, -1)
+			result["stance_changed"] = true
+			_update_player_stance(target, stance_type)
+			print("  [姿態變更] %s 變更為 %s" % [target.get_display_name(), Stance.get_stance_name(stance_type)])
 	
 	# 8. 使用者姿態變更（用於起身等自身動作）
-	if action.user_stance_change_to != "":
-		var stance_type = _parse_stance_type(action.user_stance_change_to)
-		if stance_type != null:
-			user.change_stance(stance_type, -1)
-			result["stance_changed"] = true
-			_update_player_stance(user, stance_type)
-			print("  [姿態變更] %s 變更為 %s" % [user.get_display_name(), action.user_stance_change_to])
+	if action.user_stance_change_enabled:
+		var stance_type: Stance.Type = action.user_stance_change_to
+		user.change_stance(stance_type, -1)
+		result["stance_changed"] = true
+		_update_player_stance(user, stance_type)
+		print("  [姿態變更] %s 變更為 %s" % [user.get_display_name(), Stance.get_stance_name(stance_type)])
 	
 	# 9. 特殊動作效果（如恢復體力）
 	if "rest" in action.tags:
