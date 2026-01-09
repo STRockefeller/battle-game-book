@@ -15,13 +15,15 @@ var _is_animating: bool = false
 var _node_offset_indices: Array[int] = [] # 每張卡片在佈局 offset 列表中的索引
 
 func _ready() -> void:
-	pass
+	# 動態設定 pivot_offset 以確保正確對齊
+	_update_carousel_pivot()
 
 func set_characters(list: Array) -> void:
 	characters = list.duplicate()
 	center_index = 0
 	_rebuild_cards()
 	_apply_layout()
+	_update_carousel_pivot()
 	selection_changed.emit(get_current_character())
 
 func move_left() -> void:
@@ -149,6 +151,65 @@ func _wrap_index(value: int) -> int:
 		return 0
 	var char_count := characters.size()
 	return int(((value % char_count) + char_count) % char_count)
+
+# 動態調整 Cards 容器的位置，使卡片排列的視覺中心對齊容器的 anchor 點
+func _update_carousel_pivot() -> void:
+	if card_nodes.is_empty():
+		return
+	
+	# 獲取卡片尺寸和實際視覺偏移
+	var card = card_nodes[0]
+	var card_size = card.custom_minimum_size
+	if card_size == Vector2.ZERO:
+		return
+	
+	# 卡片的 anchor 在中心 (0.5, 0.5)，但由於 offset 不對稱
+	# 卡片的實際視覺中心是 (offset_right / 2, offset_bottom / 2)
+	# 相對於位置點的偏移
+	var card_visual_offset = Vector2(100, 130)  # 256/2, 384/2
+	
+	# 獲取當前佈局
+	var layout := _get_layout_definition(card_nodes.size())
+	var offsets: Array = layout["offsets"]
+	var scales: Array = layout["scales"]
+	
+	# 計算所有卡片位置的邊界（考慮卡片大小、縮放和視覺偏移）
+	var min_x := 0.0
+	var max_x := 0.0
+	var min_y := 0.0
+	var max_y := 0.0
+	
+	for i in range(offsets.size()):
+		var offset_vec: Vector2 = offsets[i]
+		var scale_val: float = scales[i]
+		
+		# 縮放後的卡片尺寸
+		var scaled_width = card_size.x * scale_val
+		var scaled_height = card_size.y * scale_val
+		
+		# 縮放後的視覺偏移
+		var scaled_visual_offset = card_visual_offset * scale_val
+		
+		# 卡片的實際視覺中心
+		var card_center = offset_vec + scaled_visual_offset
+		
+		# 卡片的視覺範圍
+		var card_left = card_center.x - scaled_width / 2.0
+		var card_right = card_center.x + scaled_width / 2.0
+		var card_top = card_center.y - scaled_height / 2.0
+		var card_bottom = card_center.y + scaled_height / 2.0
+		
+		min_x = minf(min_x, card_left)
+		max_x = maxf(max_x, card_right)
+		min_y = minf(min_y, card_top)
+		max_y = maxf(max_y, card_bottom)
+	
+	# 計算卡片排列視覺範圍的中心點
+	var center_x := (min_x + max_x) / 2.0
+	var center_y := (min_y + max_y) / 2.0
+	
+	# 調整 Cards 容器的位置，使卡片排列的視覺中心對齊容器的 anchor 點
+	cards_container.position = Vector2(-center_x, -center_y)
 
 func _get_layout_definition(count: int) -> Dictionary:
 	match count:

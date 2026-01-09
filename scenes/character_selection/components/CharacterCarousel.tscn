@@ -1,7 +1,7 @@
-[gd_scene load_steps=3 format=3]
+[gd_scene load_steps=3 format=3 uid="uid://wbrqlkyhat8u"]
 
-[ext_resource type="Script" path="res://scenes/character_selection/components/CharacterCarousel.gd" id="1_ey683"]
-[ext_resource type="PackedScene" path="res://scenes/character_selection/components/CharacterCard.tscn" id="2_mw7op"]
+[ext_resource type="Script" uid="uid://kvjhwswmqmq5" path="res://scenes/character_selection/components/CharacterCarousel.gd" id="1_ey683"]
+[ext_resource type="PackedScene" uid="uid://dr04p1wdq7ej0" path="res://scenes/character_selection/components/CharacterCard.tscn" id="2_mw7op"]
 
 [node name="CharacterCarousel" type="Control"]
 layout_mode = 3
@@ -10,16 +10,17 @@ anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-position = Vector2(0, 0)
+grow_horizontal = 2
+grow_vertical = 2
 script = ExtResource("1_ey683")
 card_scene = ExtResource("2_mw7op")
 
 [node name="Cards" type="Control" parent="."]
-layout_mode = 3
+layout_mode = 1
 anchors_preset = 8
 anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-position = Vector2(0, 0)
-
+grow_horizontal = 2
+grow_vertical = 2
