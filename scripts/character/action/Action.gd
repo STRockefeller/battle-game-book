@@ -31,7 +31,7 @@ class_name Action
 @export var disallowed_stances: Array[Stance.Type] = []
 
 # --- 標籤與分類 ---
-@export var tags: PackedStringArray = []
+@export var tags: Array[ActionTags.Tags] = []
 
 # --- 效果 ---
 @export var effects_on_hit: PackedStringArray = []
