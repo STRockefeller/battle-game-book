@@ -16,7 +16,7 @@ cooldown = 1
 allowed_stances = PackedStringArray()
 disallowed_stances = PackedStringArray()
 tags = PackedStringArray("nature", "support", "healing", "magic")
-is_movement = false
+
 damage_multiplier = 0
 power = 30
 accuracy_modifier = 0

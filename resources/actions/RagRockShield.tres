@@ -16,7 +16,7 @@ cooldown = 2
 allowed_stances = PackedStringArray()
 disallowed_stances = PackedStringArray()
 tags = PackedStringArray("earth", "defense", "support")
-is_movement = false
+
 damage_multiplier = 0
 power = 20
 accuracy_modifier = 0

@@ -16,7 +16,7 @@ cooldown = 1
 allowed_stances = PackedStringArray()
 disallowed_stances = PackedStringArray()
 tags = PackedStringArray("alchemy", "magic", "ranged", "aoe")
-is_movement = false
+
 damage_multiplier = 1.2
 power = 18
 accuracy_modifier = 0

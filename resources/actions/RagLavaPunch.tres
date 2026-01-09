@@ -16,7 +16,7 @@ cooldown = 0
 allowed_stances = PackedStringArray()
 disallowed_stances = PackedStringArray()
 tags = PackedStringArray("fire", "physical", "close")
-is_movement = false
+
 damage_multiplier = 1.4
 power = 16
 accuracy_modifier = 0

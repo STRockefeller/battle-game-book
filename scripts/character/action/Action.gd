@@ -32,7 +32,6 @@ class_name Action
 
 # --- 標籤與分類 ---
 @export var tags: PackedStringArray = []
-@export var is_movement: bool = false
 
 # --- 效果 ---
 @export var effects_on_hit: PackedStringArray = []
