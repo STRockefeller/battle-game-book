@@ -363,4 +363,96 @@ assets/
 
 ---
 
+## 設定系統實現
+
+### 核心架構
+
+**SettingsManager.gd** - 全局設定管理器（自動載入）
+- 讀寫 `user://settings.cfg`，使用 ConfigFile 格式
+- 管理設定項：語言、全螢幕、Master/BGM/SFX 音量
+- 方法：`load_settings()`, `save_settings()`, `apply_settings()`
+- getter/setter 對每個設定項，確保型別安全
+- 啟動時自動載入並套用設定
+
+**Settings.tscn + Settings.gd** - 設定場景 UI
+- 語言選擇：OptionButton 呈現所有支援語言（中英文）
+- 全螢幕勾選：CheckButton 切換全螢幕模式
+- 音量滑桿：Master / BGM / SFX 三軌獨立控制
+  - 範圍：-40dB ~ +6dB，步進 0.5dB
+  - 即時顯示 dB 數值
+- 儲存按鈕：寫入 SettingsManager 並立即套用，顯示「已儲存」提示
+- 返回按鈕：返回主選單不保存臨時修改
+
+### 新建檔案
+
+1. `scripts/SettingsManager.gd`
+   - 常數：CONFIG_PATH, CONFIG_SECTION, DEFAULT_SETTINGS
+   - 方法：load/save/apply settings
+   - Getter/Setter: locale, fullscreen, volume_db (3 buses)
+
+2. `scenes/settings/Settings.gd`
+   - 初始化：翻譯、滑桿範圍設定、載入當前設定到 UI
+   - 信號連接：滑桿值變化、按鈕按下
+   - 保存邏輯：驗證 → 寫入 SettingsManager → 套用 → 儲存檔案
+
+3. `scenes/settings/Settings.tscn`
+   - 場景樹：Background + MainContainer (VBox)
+   - UI 元件：Title、Description、GridContainer (2 欄)、StatusLabel、ButtonRow
+
+### 功能流程
+
+1. **首次啟動**：SettingsManager 讀取 user://settings.cfg（不存在則使用預設值），自動套用
+2. **用戶進入設定**：Settings 場景載入當前設定值到 UI
+3. **調整設定**：實時更新 UI 標籤（音量 dB），不立即套用
+4. **儲存設定**：
+   - 驗證語言合法性（fallback 到預設語言）
+   - 呼叫 SettingsManager.set_* 更新記憶體
+   - 呼叫 SettingsManager.apply_settings() 套用到系統
+   - 呼叫 SettingsManager.save_settings() 寫入磁碟
+   - 顯示「已儲存」提示
+5. **返回主選單**：不保存，下次進入設定場景會重新載入已保存的值
+
+### 設定持久化機制
+
+**ConfigFile 格式** (`user://settings.cfg`):
+```
+[settings]
+locale=zh_TW
+fullscreen=false
+master_volume_db=0.0
+bgm_volume_db=-4.0
+sfx_volume_db=-4.0
+```
+
+**影響範圍**：
+- 語言：`Localization.set_locale()` → `TranslationServer.set_locale()`
+- 全螢幕：`DisplayServer.window_set_mode()`
+- 音量：`AudioServer.set_bus_volume_db()` for Master/BGM/SFX buses
+
+### 向後相容性
+
+- SettingsManager 無預設值（完全依賴 DEFAULT_SETTINGS）
+- Localization.gd 無改動，SettingsManager 呼叫其公開方法
+- 舊存檔不受影響，首次啟動自動產生預設設定檔
+
+### 後續改進建議
+
+**短期 (1-2 週)**:
+1. 新增圖形設定：解析度、亮度、游標敏感度
+2. 新增遊戲設定：難度、自動保存間隔
+3. 設定頁面搜尋和分類（基本/進階）
+4. 重設為預設值按鈕
+
+**中期 (1-2 月)**:
+1. 快速鍵設定 UI
+2. 控制器/手把支援設定
+3. 進階音效設定（EQ、環繞音）
+
+**長期 (3+ 月)**:
+1. 設定雲端同步（跨設備同步）
+2. 設定備份與匯入/匯出
+3. 設定衝突解決機制（多設備）
+
+---
+
 ## 完整對戰流程實現
