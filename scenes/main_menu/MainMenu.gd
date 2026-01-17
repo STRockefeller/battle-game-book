@@ -33,7 +33,7 @@ func _on_test_battle_pressed():
 	get_tree().change_scene_to_file("res://scenes/character_selection/CharacterSelection.tscn")
 
 func _on_settings_pressed():
-	print("設置 - 功能待實現")
+	get_tree().change_scene_to_file("res://scenes/settings/Settings.tscn")
 
 func _on_credits_pressed():
 	print("製作人員 - 功能待實現")

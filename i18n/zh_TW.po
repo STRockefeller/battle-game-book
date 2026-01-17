@@ -145,3 +145,39 @@ msgstr "姿態: {stance}"
 
 msgid "battle.stance.default"
 msgstr "站立"
+
+msgid "settings.title"
+msgstr "設定"
+
+msgid "settings.subtitle"
+msgstr "調整語言、音量與顯示設定"
+
+msgid "settings.language"
+msgstr "語言"
+
+msgid "settings.fullscreen"
+msgstr "全螢幕"
+
+msgid "settings.master_volume"
+msgstr "主音量"
+
+msgid "settings.bgm_volume"
+msgstr "BGM 音量"
+
+msgid "settings.sfx_volume"
+msgstr "SFX 音量"
+
+msgid "settings.save"
+msgstr "儲存"
+
+msgid "settings.back"
+msgstr "返回"
+
+msgid "settings.saved"
+msgstr "已儲存"
+
+msgid "settings.locale.en"
+msgstr "英文"
+
+msgid "settings.locale.zh_tw"
+msgstr "繁體中文"

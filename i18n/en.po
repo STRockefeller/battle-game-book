@@ -145,3 +145,39 @@ msgstr "Stance: {stance}"
 
 msgid "battle.stance.default"
 msgstr "Standing"
+
+msgid "settings.title"
+msgstr "Settings"
+
+msgid "settings.subtitle"
+msgstr "Adjust language, audio, and display"
+
+msgid "settings.language"
+msgstr "Language"
+
+msgid "settings.fullscreen"
+msgstr "Fullscreen"
+
+msgid "settings.master_volume"
+msgstr "Master Volume"
+
+msgid "settings.bgm_volume"
+msgstr "BGM Volume"
+
+msgid "settings.sfx_volume"
+msgstr "SFX Volume"
+
+msgid "settings.save"
+msgstr "Save"
+
+msgid "settings.back"
+msgstr "Back"
+
+msgid "settings.saved"
+msgstr "Saved!"
+
+msgid "settings.locale.en"
+msgstr "English"
+
+msgid "settings.locale.zh_tw"
+msgstr "Traditional Chinese"

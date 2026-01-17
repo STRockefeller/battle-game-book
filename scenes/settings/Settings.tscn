@@ -1,0 +1,195 @@
+[gd_scene load_steps=2 format=3 uid="uid://settingsscene"]
+
+[ext_resource type="Script" path="res://scenes/settings/Settings.gd" id="1_ww3cq"]
+
+[node name="Settings" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_left = 0.0
+anchor_top = 0.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 0.0
+offset_top = 0.0
+offset_right = 0.0
+offset_bottom = 0.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_ww3cq")
+
+[node name="BackgroundColor" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_left = 0.0
+anchor_top = 0.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 0.0
+offset_top = 0.0
+offset_right = 0.0
+offset_bottom = 0.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.12, 0.12, 0.16, 1)
+
+[node name="MainMargin" type="MarginContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_left = 0.0
+anchor_top = 0.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 0.0
+offset_top = 0.0
+offset_right = 0.0
+offset_bottom = 0.0
+grow_horizontal = 2
+grow_vertical = 2
+custom_constants/margin_left = 80
+custom_constants/margin_top = 80
+custom_constants/margin_right = 80
+custom_constants/margin_bottom = 80
+
+[node name="MainContainer" type="VBoxContainer" parent="MainMargin"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+alignment = 1
+theme_override_constants/separation = 16
+
+[node name="TitleLabel" type="Label" parent="MainMargin/MainContainer"]
+layout_mode = 2
+text = "設定"
+vertical_alignment = 1
+horizontal_alignment = 1
+theme_override_font_sizes/font_size = 48
+
+[node name="DescriptionLabel" type="Label" parent="MainMargin/MainContainer"]
+layout_mode = 2
+text = "調整語言、音量與顯示設定"
+vertical_alignment = 1
+horizontal_alignment = 1
+theme_override_font_sizes/font_size = 18
+
+[node name="SettingsGrid" type="GridContainer" parent="MainMargin/MainContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+columns = 2
+custom_constants/hseparation = 20
+custom_constants/vseparation = 14
+
+[node name="LanguageLabel" type="Label" parent="MainMargin/MainContainer/SettingsGrid"]
+layout_mode = 2
+text = "語言"
+vertical_alignment = 1
+
+[node name="LanguageOption" type="OptionButton" parent="MainMargin/MainContainer/SettingsGrid"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="FullscreenLabel" type="Label" parent="MainMargin/MainContainer/SettingsGrid"]
+layout_mode = 2
+text = "全螢幕"
+vertical_alignment = 1
+
+[node name="FullscreenCheck" type="CheckButton" parent="MainMargin/MainContainer/SettingsGrid"]
+layout_mode = 2
+text = ""
+
+[node name="MasterLabel" type="Label" parent="MainMargin/MainContainer/SettingsGrid"]
+layout_mode = 2
+text = "主音量"
+vertical_alignment = 1
+
+[node name="MasterSliderContainer" type="HBoxContainer" parent="MainMargin/MainContainer/SettingsGrid"]
+layout_mode = 2
+size_flags_horizontal = 3
+alignment = 1
+custom_constants/separation = 12
+
+[node name="MasterSlider" type="HSlider" parent="MainMargin/MainContainer/SettingsGrid/MasterSliderContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+step = 0.5
+min_value = -40.0
+max_value = 6.0
+
+[node name="MasterValue" type="Label" parent="MainMargin/MainContainer/SettingsGrid/MasterSliderContainer"]
+layout_mode = 2
+text = "0.0 dB"
+vertical_alignment = 1
+
+[node name="BgmLabel" type="Label" parent="MainMargin/MainContainer/SettingsGrid"]
+layout_mode = 2
+text = "BGM 音量"
+vertical_alignment = 1
+
+[node name="BgmSliderContainer" type="HBoxContainer" parent="MainMargin/MainContainer/SettingsGrid"]
+layout_mode = 2
+size_flags_horizontal = 3
+alignment = 1
+custom_constants/separation = 12
+
+[node name="BgmSlider" type="HSlider" parent="MainMargin/MainContainer/SettingsGrid/BgmSliderContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+step = 0.5
+min_value = -40.0
+max_value = 6.0
+
+[node name="BgmValue" type="Label" parent="MainMargin/MainContainer/SettingsGrid/BgmSliderContainer"]
+layout_mode = 2
+text = "0.0 dB"
+vertical_alignment = 1
+
+[node name="SfxLabel" type="Label" parent="MainMargin/MainContainer/SettingsGrid"]
+layout_mode = 2
+text = "SFX 音量"
+vertical_alignment = 1
+
+[node name="SfxSliderContainer" type="HBoxContainer" parent="MainMargin/MainContainer/SettingsGrid"]
+layout_mode = 2
+size_flags_horizontal = 3
+alignment = 1
+custom_constants/separation = 12
+
+[node name="SfxSlider" type="HSlider" parent="MainMargin/MainContainer/SettingsGrid/SfxSliderContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+step = 0.5
+min_value = -40.0
+max_value = 6.0
+
+[node name="SfxValue" type="Label" parent="MainMargin/MainContainer/SettingsGrid/SfxSliderContainer"]
+layout_mode = 2
+text = "0.0 dB"
+vertical_alignment = 1
+
+[node name="StatusLabel" type="Label" parent="MainMargin/MainContainer"]
+layout_mode = 2
+text = ""
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="ButtonRow" type="HBoxContainer" parent="MainMargin/MainContainer"]
+layout_mode = 2
+alignment = 1
+custom_constants/separation = 24
+
+[node name="SaveButton" type="Button" parent="MainMargin/MainContainer/ButtonRow"]
+layout_mode = 2
+custom_minimum_size = Vector2(180, 64)
+text = "儲存"
+theme_override_font_sizes/font_size = 20
+
+[node name="BackButton" type="Button" parent="MainMargin/MainContainer/ButtonRow"]
+layout_mode = 2
+custom_minimum_size = Vector2(180, 64)
+text = "返回"
+theme_override_font_sizes/font_size = 20
+
+[connection signal="value_changed" from="MainMargin/MainContainer/SettingsGrid/MasterSliderContainer/MasterSlider" to="." method="_on_master_slider_value_changed"]
+[connection signal="value_changed" from="MainMargin/MainContainer/SettingsGrid/BgmSliderContainer/BgmSlider" to="." method="_on_bgm_slider_value_changed"]
+[connection signal="value_changed" from="MainMargin/MainContainer/SettingsGrid/SfxSliderContainer/SfxSlider" to="." method="_on_sfx_slider_value_changed"]
+[connection signal="pressed" from="MainMargin/MainContainer/ButtonRow/SaveButton" to="." method="_on_save_button_pressed"]
+[connection signal="pressed" from="MainMargin/MainContainer/ButtonRow/BackButton" to="." method="_on_back_button_pressed"]

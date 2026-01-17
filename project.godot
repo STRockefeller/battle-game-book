@@ -19,6 +19,7 @@ config/icon="res://icon.svg"
 
 BattleConfig="*res://scripts/BattleConfig.gd"
 Localization="*res://scripts/Localization.gd"
+SettingsManager="*res://scripts/SettingsManager.gd"
 
 [display]
 
