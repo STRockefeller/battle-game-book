@@ -43,6 +43,8 @@ export_credentials.cfg
 *.exe
 *.zip
 todo.md
+assets/docs/tmp docs/
+EXAMPLE*.txt
 
 # ============================================
 # IDE & OS 特定

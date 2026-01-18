@@ -20,6 +20,7 @@ config/icon="res://icon.svg"
 BattleConfig="*res://scripts/BattleConfig.gd"
 Localization="*res://scripts/Localization.gd"
 SettingsManager="*res://scripts/SettingsManager.gd"
+StoryManager="*res://scripts/story/StoryManager.gd"
 
 [display]
 

@@ -124,3 +124,6 @@ resources/statuses/
 - `/assets/docs/StatusEffectSystem.md` - 狀態效果系統文檔
 - `/assets/docs/Stance.md` - 姿態系統文檔
 - `/assets/docs/AISystem.md` - AI 系統設計與資源化建議 ⭐
+- `/assets/docs/Story.md` - 故事模式設計文檔 ⭐
+- `/resources/STORY_SYSTEM.md` - 故事系統實作文檔 ⭐⭐
+- `/STORY_INDEX.md` - 故事系統完整索引 ⭐⭐⭐
