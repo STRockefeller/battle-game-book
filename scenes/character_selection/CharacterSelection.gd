@@ -7,11 +7,15 @@ enum Phase { PLAYER_SELECT, ENEMY_SELECT, CONFIRM }
 @onready var carousel: CharacterCarousel = $CenterOverlay/CharacterCarousel
 @onready var instruction_label: Label = $InstructionLabel
 @onready var ai_hint_label: Label = $CenterOverlay/AIHint
+var passive_panel_scene: PackedScene = load("res://scenes/character_selection/components/PassiveSelectionPanel.tscn")
+var passive_panel
 
 # 選擇狀態
 var selected_player_character: Character = null
 var selected_enemy_character: Character = null
 var selected_ai_behavior: String = "random"
+var player_passive_traits: Array[String] = []
+var enemy_passive_traits: Array[String] = []
 
 # 資源快取
 var character_resources: Array[String] = []
@@ -111,10 +115,8 @@ func _confirm_current_selection() -> void:
 		Phase.PLAYER_SELECT:
 			selected_player_character = current_char.duplicate()
 			top_panel.set_character(selected_player_character)
-			phase = Phase.ENEMY_SELECT
-			bottom_panel.clear()
-			_update_ai_hint()
-			_update_instructions()
+			# 打開被動特質選擇面板
+			_show_passive_selection()
 		Phase.ENEMY_SELECT:
 			selected_enemy_character = current_char.duplicate()
 			bottom_panel.set_character(selected_enemy_character)
@@ -150,6 +152,39 @@ func _cycle_ai_behavior() -> void:
 			break
 	selected_ai_behavior = ai_behaviors[(current_index + 1) % ai_behaviors.size()].get("id", selected_ai_behavior)
 	_update_ai_hint()
+
+func _show_passive_selection() -> void:
+	if passive_panel:
+		passive_panel.queue_free()
+	passive_panel = passive_panel_scene.instantiate()
+	add_child(passive_panel)
+	passive_panel.setup(2)
+	passive_panel.confirmed.connect(func(ids: Array[String]):
+		player_passive_traits = ids
+		# 關閉面板並進入對手選擇
+		passive_panel.queue_free()
+		phase = Phase.ENEMY_SELECT
+		bottom_panel.clear()
+		_update_ai_hint()
+		_update_instructions()
+	)
+	passive_panel.canceled.connect(func():
+		# 若取消，回到玩家選擇
+		passive_panel.queue_free()
+		selected_player_character = null
+		top_panel.clear()
+		phase = Phase.PLAYER_SELECT
+		_update_ai_hint()
+		_update_instructions()
+	)
+
+func _pick_enemy_passives_random(count: int = 2) -> Array[String]:
+	var all_traits = PassiveTraitLibrary.get_all_traits()
+	var pool: Array[String] = []
+	for t in all_traits:
+		pool.append(t.id)
+	pool.shuffle()
+	return pool.slice(0, min(count, pool.size()))
 
 func _update_ai_hint() -> void:
 	if phase != Phase.ENEMY_SELECT:
@@ -196,10 +231,15 @@ func _start_battle_transition() -> void:
 	if selected_player_character == null or selected_enemy_character == null:
 		return
 	_is_transitioning = true
+	# 若敵方未指定被動，隨機選擇
+	if enemy_passive_traits.is_empty():
+		enemy_passive_traits = _pick_enemy_passives_random(2)
 	BattleConfig.set_battle_config(
 		selected_player_character,
 		selected_enemy_character,
-		selected_ai_behavior
+		selected_ai_behavior,
+		player_passive_traits,
+		enemy_passive_traits
 	)
 	var tween := create_tween()
 	tween.tween_property(self, "modulate:a", 0.0, 0.35).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)

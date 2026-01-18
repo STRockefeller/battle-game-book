@@ -80,7 +80,7 @@ func get_active_modifiers(property: String, character: Character = null,
 ## 應用效果到指定屬性(計算最終修正值)
 func apply_effects(property: String, base_value: float, character: Character = null,
                   opponent: Character = null, action: Action = null, 
-                  turn: int = -1, action_tags: Array[String] = []) -> float:
+                  turn: int = -1, action_tags: Array[ActionTags.Tags] = []) -> float:
 	var modifiers = get_active_modifiers(property, character, opponent, action, turn)
 	var result = base_value
 	var multiply_factor = 1.0
@@ -114,7 +114,7 @@ func apply_effects(property: String, base_value: float, character: Character = n
 ## 應用整數類效果(用於HP、MP等)
 func apply_effects_int(property: String, base_value: int, character: Character = null,
                       opponent: Character = null, action: Action = null, 
-                      turn: int = -1, action_tags: Array[String] = []) -> int:
+                      turn: int = -1, action_tags: Array[ActionTags.Tags] = []) -> int:
 	return int(apply_effects(property, float(base_value), character, opponent, 
 	                         action, turn, action_tags))
 

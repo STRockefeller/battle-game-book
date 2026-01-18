@@ -37,6 +37,9 @@ var player1: Character
 var player2: Character
 var characters: Array[Character] = []
 
+# 效果系統（用於被動特質等）
+var effect_manager
+
 # AI 行為
 var player1_ai: AIBehavior
 var player2_ai: AIBehavior
@@ -72,6 +75,21 @@ func _ready():
 				player2 = hero_template.duplicate()
 	
 	characters = [player1, player2]
+
+	# 設置效果系統並套用被動特質
+	effect_manager = EffectManager.new()
+	var p_traits = BattleConfig.get_player_passive_traits()
+	var e_traits = BattleConfig.get_enemy_passive_traits()
+	for tid in p_traits:
+		var pasive_trait = PassiveTraitLibrary.get_trait_by_id(tid)
+		if pasive_trait:
+			var mod = pasive_trait.to_modifier()
+			effect_manager.add_modifier(mod)
+	for tid in e_traits:
+		var trait_e = PassiveTraitLibrary.get_trait_by_id(tid)
+		if trait_e:
+			var mod_e = trait_e.to_modifier()
+			effect_manager.add_modifier(mod_e)
 	
 	# 初始化戰鬥狀態
 	var BattleStateClass = load("res://scripts/BattleState.gd")
@@ -246,9 +264,10 @@ func _execute_single_action(user: Character, target: Character, action: Action):
 		action_executed.emit(user, target, action, result)
 		return
 	
-	# 2. 檢查資源成本
-	var cost_stamina = action.cost_stamina if action.cost_stamina > 0 else 0
-	var cost_mp = action.cost_mp if action.cost_mp > 0 else 0
+	# 2. 檢查資源成本（應用被動效果的消耗減免）
+	var cost_result = calculate_action_cost(user, target, action)
+	var cost_stamina = cost_result["stamina"]
+	var cost_mp = cost_result["mp"]
 	var current_stamina = get_current_stamina(user)
 	var current_mp = get_current_mp(user)
 	
@@ -272,28 +291,38 @@ func _execute_single_action(user: Character, target: Character, action: Action):
 		result["hit"] = true
 		print("  [格擋] 自動成功")
 	else:
-		var accuracy = action.get_accuracy_at_range(current_distance)
-		var accuracy_bonus = user.get_accuracy_bonus()
-		result["hit"] = _roll_hit(accuracy, accuracy_bonus)
-		print("  [命中判定] %s → %s: 基礎命中=%s%%, 加成=%d, 判定=%s" % [user.get_display_name(), target.get_display_name(), accuracy, accuracy_bonus, result["hit"]])
+		var hit_result = calculate_hit_chance(user, target, action)
+		result["hit"] = hit_result["hit"]
+		print("  [命中判定] %s → %s: 基礎=%s%%, 命中加成=%d, 閃避=%d, 最終=%s%%, 判定=%s" % [
+			user.get_display_name(), 
+			target.get_display_name(), 
+			hit_result["base_accuracy"],
+			hit_result["accuracy_bonus"],
+			hit_result["evasion_bonus"],
+			hit_result["final_accuracy"],
+			result["hit"]
+		])
 	
 	if result["hit"]:
-		# 5. 計算傷害（簡化後的系統：固定傷害 × 被動加成 × (1 - 減傷)）
-		var damage_bonus_percent = user.get_damage_bonus_percent()
-		var defense_reduction_percent = target.get_defense_reduction_percent()
+		# 5. 計算傷害（應用被動特質）
 		result["damage"] = action.damage
-		result["actual_damage"] = BattleLogic.calculate_damage_result(action.damage, damage_bonus_percent, defense_reduction_percent)
+		result["actual_damage"] = calculate_final_damage(user, target, action, action.damage)
 		
-		print("  [傷害計算] 基礎=%d, 傷害加成=%.0f%%, 減傷=%.0f%%, 最終=%d" % [action.damage, damage_bonus_percent, defense_reduction_percent, result["actual_damage"]])
+		print("  [傷害計算] 基礎=%d, 最終=%d" % [action.damage, result["actual_damage"]])
 		
 		if action.damage > 0:
-			# 計算爆擊
-			var crit_rate = action.critical_rate + user.get_crit_rate_bonus_percent()
-			result["is_critical"] = randf() * 100 < crit_rate
+			# 計算爆擊（應用被動）
+			var crit_result = calculate_critical_result(user, target, action, result["actual_damage"])
+			result["is_critical"] = crit_result["is_critical"]
+			result["actual_damage"] = crit_result["damage"]
 			
 			if result["is_critical"]:
-				result["actual_damage"] = BattleLogic.calculate_critical_damage(result["actual_damage"], 1.5)
-				print("  [爆擊!] 傷害提升至 %d" % result["actual_damage"])
+				print("  [爆擊!] 爆擊率=%.1f%%, 倍率=%.2f, 傷害=%d → %d" % [
+					crit_result["crit_rate"],
+					crit_result["crit_multiplier"],
+					action.damage,
+					result["actual_damage"]
+				])
 			
 			# 應用傷害
 			var current_hp = get_current_hp(target)
@@ -440,6 +469,113 @@ func get_action_state(character: Character, action: Action) -> Dictionary:
 ## 命中判定
 func _roll_hit(action_accuracy: float, accuracy_bonus: int) -> bool:
 	return BattleLogic.calculate_hit_static(action_accuracy, accuracy_bonus)
+
+# ==================== 戰鬥計算方法（集中管理所有修正因素）====================
+
+## 計算動作的實際消耗（應用所有修正）
+func calculate_action_cost(user: Character, target: Character, action: Action) -> Dictionary:
+	var base_stamina = max(action.cost_stamina, 0)
+	var base_mp = max(action.cost_mp, 0)
+	
+	# 應用消耗減免修正
+	var stamina_reduction = 0.0
+	var mp_reduction = 0.0
+	
+	if effect_manager:
+		stamina_reduction = effect_manager.apply_effects(
+			"stamina_cost_reduction", 0.0, user, target, action, state.turn, action.tags
+		)
+		mp_reduction = effect_manager.apply_effects(
+			"mp_cost_reduction", 0.0, user, target, action, state.turn, action.tags
+		)
+	
+	return {
+		"stamina": int(max(0.0, round(float(base_stamina) * (1.0 - stamina_reduction)))),
+		"mp": int(max(0.0, round(float(base_mp) * (1.0 - mp_reduction))))
+	}
+
+## 計算最終傷害（應用所有修正）
+func calculate_final_damage(attacker: Character, defender: Character, action: Action, base_damage: int) -> int:
+	if base_damage <= 0:
+		return 0
+	
+	var damage_bonus = 0.0
+	var defense_reduction = 0.0
+	
+	if effect_manager:
+		# 攻擊方的傷害加成
+		damage_bonus = effect_manager.apply_effects(
+			"damage_bonus", 0.0, attacker, defender, action, state.turn, action.tags
+		)
+		# 防守方的減傷
+		defense_reduction = effect_manager.apply_effects(
+			"damage_reduction", 0.0, defender, attacker, action, state.turn, action.tags
+		)
+	
+	# 使用 BattleLogic 計算最終傷害
+	var final_damage = BattleLogic.calculate_damage_result(
+		base_damage, 
+		damage_bonus * 100.0, 
+		defense_reduction * 100.0
+	)
+	
+	return final_damage
+
+## 計算爆擊結果（應用所有修正）
+func calculate_critical_result(attacker: Character, defender: Character, action: Action, base_damage: int) -> Dictionary:
+	var crit_rate_bonus = 0.0
+	var crit_multiplier = 1.5  # 預設爆擊倍率
+	
+	if effect_manager:
+		# 爆擊率加成
+		crit_rate_bonus = effect_manager.apply_effects(
+			"critical_rate", 0.0, attacker, defender, action, state.turn, action.tags
+		)
+		# 爆擊傷害倍率
+		crit_multiplier = effect_manager.apply_effects(
+			"critical_damage_multiplier", 1.5, attacker, defender, action, state.turn, action.tags
+		)
+	
+	var final_crit_rate = action.critical_rate + crit_rate_bonus * 100.0
+	var is_critical = randf() * 100 < final_crit_rate
+	
+	var final_damage = base_damage
+	if is_critical:
+		final_damage = BattleLogic.calculate_critical_damage(base_damage, crit_multiplier)
+	
+	return {
+		"is_critical": is_critical,
+		"crit_rate": final_crit_rate,
+		"crit_multiplier": crit_multiplier,
+		"damage": final_damage
+	}
+
+## 計算命中率（應用所有修正）
+func calculate_hit_chance(attacker: Character, defender: Character, action: Action) -> Dictionary:
+	var base_accuracy = action.get_accuracy_at_range(current_distance)
+	var accuracy_bonus = 0
+	var evasion_bonus = 0
+	
+	# 可以從角色或效果系統獲取修正
+	if attacker:
+		accuracy_bonus = attacker.get_accuracy_bonus()
+	
+	if defender:
+		evasion_bonus = defender.get_evasion_bonus()
+	
+	# 將來可以在這裡添加更多修正因素
+	# 例如：地形、天氣、狀態效果等
+	
+	var final_accuracy = base_accuracy + accuracy_bonus - evasion_bonus
+	var did_hit = _roll_hit(final_accuracy, 0)
+	
+	return {
+		"base_accuracy": base_accuracy,
+		"accuracy_bonus": accuracy_bonus,
+		"evasion_bonus": evasion_bonus,
+		"final_accuracy": final_accuracy,
+		"hit": did_hit
+	}
 
 # ==================== 狀態管理方法 ====================
 
