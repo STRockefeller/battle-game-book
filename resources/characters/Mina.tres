@@ -3,9 +3,9 @@
 [ext_resource type="Script" uid="uid://domisvh5oa808" path="res://scripts/character/Character.gd" id="1"]
 [ext_resource type="Script" uid="uid://lib35gjqlung" path="res://scripts/character/action/Action.gd" id="1_k5j51"]
 [ext_resource type="Resource" path="res://resources/characters/assets/MinaAssets.tres" id="2"]
-[ext_resource type="Resource" path="res://resources/actions/MinaIllusion.tres" id="3"]
-[ext_resource type="Resource" path="res://resources/actions/MinaHypnosis.tres" id="4"]
-[ext_resource type="Resource" path="res://resources/actions/MinaDreamErosion.tres" id="5"]
+[ext_resource type="Resource" path="res://resources/actions/mina_illusion/action.tres" id="3"]
+[ext_resource type="Resource" path="res://resources/actions/mina_hypnosis/action.tres" id="4"]
+[ext_resource type="Resource" path="res://resources/actions/mina_dream_erosion/action.tres" id="5"]
 
 [resource]
 script = ExtResource("1")

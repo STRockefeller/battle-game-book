@@ -12,6 +12,17 @@ var turn: int = 0
 ## 最大回合數
 var max_turns: int = 100
 
+# ==================== 戰場距離 ====================
+
+## 戰鬥距離（0=近、1=中、2=遠）
+enum Distance {
+	NEAR,
+	MID,
+	FAR
+}
+
+var distance: int = Distance.MID
+
 # ==================== 玩家 1 狀態 ====================
 
 var p1_current_hp: int = 0
@@ -52,6 +63,7 @@ func _init(
 	
 	turn = 1
 	max_turns = 100
+	distance = Distance.MID
 
 # ==================== 序列化 ====================
 
@@ -60,6 +72,7 @@ func to_dict() -> Dictionary:
 	return {
 		"turn": turn,
 		"max_turns": max_turns,
+		"distance": distance,
 		"p1": {
 			"hp": p1_current_hp,
 			"mp": p1_current_mp,
@@ -80,6 +93,11 @@ func to_dict() -> Dictionary:
 func from_dict(data: Dictionary) -> void:
 	turn = data.get("turn", 1)
 	max_turns = data.get("max_turns", 100)
+	distance = clamp(
+		data.get("distance", Distance.MID),
+		Distance.NEAR,
+		Distance.FAR
+	)
 	
 	if data.has("p1"):
 		var p1_data = data["p1"]
@@ -171,8 +189,9 @@ func get_player_cooldowns(player_id: int) -> Dictionary:
 
 ## 計算狀態簽名用於驗證（防止篡改）
 func calculate_hash() -> String:
-	var state_str = "%d_%d_%d_%d_%d_%d_%d_%d_%d_%d_%d_%d" % [
+	var state_str = "%d_%d_%d_%d_%d_%d_%d_%d_%d_%d_%d_%d_%d" % [
 		turn,
+		distance,
 		p1_current_hp, p1_current_mp, p1_current_stamina, p1_stance,
 		p2_current_hp, p2_current_mp, p2_current_stamina, p2_stance,
 		p1_cooldowns.size(),

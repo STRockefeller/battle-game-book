@@ -2,9 +2,9 @@
 
 [ext_resource type="Script" path="res://scripts/character/Character.gd" id="1"]
 [ext_resource type="Resource" path="res://resources/characters/assets/RagAssets.tres" id="2"]
-[ext_resource type="Resource" path="res://resources/actions/RagLavaPunch.tres" id="3"]
-[ext_resource type="Resource" path="res://resources/actions/RagRockShield.tres" id="4"]
-[ext_resource type="Resource" path="res://resources/actions/RagEarthQuake.tres" id="5"]
+[ext_resource type="Resource" path="res://resources/actions/rag_lava_punch/action.tres" id="3"]
+[ext_resource type="Resource" path="res://resources/actions/rag_rock_shield/action.tres" id="4"]
+[ext_resource type="Resource" path="res://resources/actions/rag_earth_quake/action.tres" id="5"]
 
 [resource]
 script = ExtResource("1")

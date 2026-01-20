@@ -2,9 +2,9 @@
 
 [ext_resource type="Script" path="res://scripts/character/Character.gd" id="1"]
 [ext_resource type="Resource" path="res://resources/characters/assets/CyrusAssets.tres" id="2"]
-[ext_resource type="Resource" path="res://resources/actions/CyrusSwordStrike.tres" id="3"]
-[ext_resource type="Resource" path="res://resources/actions/CyrusLightBarrier.tres" id="4"]
-[ext_resource type="Resource" path="res://resources/actions/CyrusRoyalCommand.tres" id="5"]
+[ext_resource type="Resource" path="res://resources/actions/cyrus_sword_strike/action.tres" id="3"]
+[ext_resource type="Resource" path="res://resources/actions/cyrus_light_barrier/action.tres" id="4"]
+[ext_resource type="Resource" path="res://resources/actions/cyrus_royal_command/action.tres" id="5"]
 
 [resource]
 script = ExtResource("1")

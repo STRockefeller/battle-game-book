@@ -18,8 +18,7 @@ class_name Action
 @export var cost_mp: int = 0 
 @export var cooldown: int = 0
 
-# --- 固定傷害與命中值（新系統）---
-@export var damage: int = 0              # 固定傷害值
+# --- 命中與爆擊（由積木系統細緻控制）---
 @export var accuracy: float = 100.0      # 基礎命中率 (%)
 @export var critical_rate: float = 0.0   # 基礎爆擊率 (%)
 
@@ -33,14 +32,9 @@ class_name Action
 # --- 標籤與分類 ---
 @export var tags: Array[ActionTags.Tags] = []
 
-# --- 效果 ---
-@export var effects_on_hit: PackedStringArray = []
-@export var effects_on_use: PackedStringArray = []
-## 姿態變更設定：使用啟用旗標 + 目標姿態型別
-@export var target_stance_change_enabled: bool = false
-@export var target_stance_change_to: Stance.Type = Stance.Type.STANDING
-@export var user_stance_change_enabled: bool = false
-@export var user_stance_change_to: Stance.Type = Stance.Type.STANDING
+# --- 效果系統 ---
+## 模組化效果系統：使用 EffectComponent 積木組合
+@export var effects: Array[EffectComponent] = []
 
 @export var priority: int = 0  # 行動優先度
 
@@ -73,3 +67,23 @@ func get_accuracy_at_range(range_type: String) -> float:
 	if accuracy_by_range.has(range_type):
 		return accuracy_by_range[range_type]
 	return accuracy
+
+## 檢查此動作是否使用新的效果積木系統
+func uses_effect_components() -> bool:
+	return effects.size() > 0
+
+## 獲取特定執行時機的效果列表
+func get_effects_by_time(execution_time: EffectComponent.ExecutionTime) -> Array[EffectComponent]:
+	var filtered: Array[EffectComponent] = []
+	for effect in effects:
+		if effect.execution_time == execution_time:
+			filtered.append(effect)
+	return filtered
+
+## 獲取特定條件類型的效果列表
+func get_effects_by_condition(condition_type: EffectComponent.ConditionType) -> Array[EffectComponent]:
+	var filtered: Array[EffectComponent] = []
+	for effect in effects:
+		if effect.condition_type == condition_type:
+			filtered.append(effect)
+	return filtered

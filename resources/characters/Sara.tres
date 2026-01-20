@@ -2,9 +2,9 @@
 
 [ext_resource type="Script" path="res://scripts/character/Character.gd" id="1"]
 [ext_resource type="Resource" path="res://resources/characters/assets/SaraAssets.tres" id="2"]
-[ext_resource type="Resource" path="res://resources/actions/SaraAlchemyBomb.tres" id="3"]
-[ext_resource type="Resource" path="res://resources/actions/SaraElementShift.tres" id="4"]
-[ext_resource type="Resource" path="res://resources/actions/SaraEnergyRepair.tres" id="5"]
+[ext_resource type="Resource" path="res://resources/actions/sara_alchemy_bomb/action.tres" id="3"]
+[ext_resource type="Resource" path="res://resources/actions/sara_element_shift/action.tres" id="4"]
+[ext_resource type="Resource" path="res://resources/actions/sara_energy_repair/action.tres" id="5"]
 
 [resource]
 script = ExtResource("1")

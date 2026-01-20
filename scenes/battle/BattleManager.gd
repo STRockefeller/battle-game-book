@@ -257,6 +257,14 @@ func _execute_single_action(user: Character, target: Character, action: Action):
 	
 	print("[_execute_single_action] %s 使用 %s | 檢查資源成本" % [user.get_display_name(), action.name])
 	
+	# === 步驟 1: 執行 ON_USE 效果（使用時觸發，如增益、準備動作等）===
+	if action.uses_effect_components():
+		var context = EffectExecutor.build_context(self, action, user, target, {})
+		var on_use_results = EffectExecutor.execute_effects(
+			action, EffectComponent.ExecutionTime.ON_USE, user, target, context
+		)
+		print("  [ON_USE 效果] 執行了 %d 個效果" % on_use_results["effects_executed"].size())
+	
 	# 1. 檢查冷卻
 	var cooldowns = _get_player_cooldowns(user)
 	if cooldowns.has(action.id) and cooldowns[action.id] > 0:
@@ -304,58 +312,37 @@ func _execute_single_action(user: Character, target: Character, action: Action):
 		])
 	
 	if result["hit"]:
-		# 5. 計算傷害（應用被動特質）
-		result["damage"] = action.damage
-		result["actual_damage"] = calculate_final_damage(user, target, action, action.damage)
-		
-		print("  [傷害計算] 基礎=%d, 最終=%d" % [action.damage, result["actual_damage"]])
-		
-		if action.damage > 0:
-			# 計算爆擊（應用被動）
-			var crit_result = calculate_critical_result(user, target, action, result["actual_damage"])
-			result["is_critical"] = crit_result["is_critical"]
-			result["actual_damage"] = crit_result["damage"]
+		# === 新系統：執行 ON_HIT 效果 ===
+		if action.uses_effect_components():
+			var context = EffectExecutor.build_context(self, action, user, target, {"hit": true})
+			var on_hit_results = EffectExecutor.execute_effects(
+				action, EffectComponent.ExecutionTime.ON_HIT, user, target, context
+			)
 			
-			if result["is_critical"]:
-				print("  [爆擊!] 爆擊率=%.1f%%, 倍率=%.2f, 傷害=%d → %d" % [
-					crit_result["crit_rate"],
-					crit_result["crit_multiplier"],
-					action.damage,
-					result["actual_damage"]
-				])
-			
-			# 應用傷害
-			var current_hp = get_current_hp(target)
-			set_current_hp(target, current_hp - result["actual_damage"])
+			# 從積木系統匯總傷害
+			if on_hit_results["total_damage"] > 0:
+				result["damage"] = on_hit_results["total_damage"]
+				result["actual_damage"] = on_hit_results["total_damage"]
+				print("  [積木系統傷害] 總傷害=%d" % on_hit_results["total_damage"])
 		
-		# 6. 應用狀態效果
-		if action.effects_on_hit.size() > 0:
-			for effect_id in action.effects_on_hit:
-				var effect_resource = load("res://resources/statuses/%s.tres" % effect_id.capitalize())
-				if effect_resource:
-					target.apply_effect(effect_resource)
-					result["status_applied"] = effect_id
-					print("  [狀態效果] 對 %s 施加了 %s" % [target.get_display_name(), effect_id])
-				else:
-					print("  [警告] 無法加載狀態效果: %s" % effect_id)
-		
-		# 7. 改變姿態（目標）
-		if action.target_stance_change_enabled:
-			var stance_type: Stance.Type = action.target_stance_change_to
-			target.change_stance(stance_type, -1)
-			result["stance_changed"] = true
-			_update_player_stance(target, stance_type)
-			print("  [姿態變更] %s 變更為 %s" % [target.get_display_name(), Stance.get_stance_name(stance_type)])
+		# === 檢查是否擊殺 ===
+		if get_current_hp(target) <= 0 and action.uses_effect_components():
+			var context = EffectExecutor.build_context(self, action, user, target, {"hit": true, "kill": true})
+			var on_kill_results = EffectExecutor.execute_effects(
+				action, EffectComponent.ExecutionTime.ON_KILL, user, target, context
+			)
+			print("  [ON_KILL 效果] 執行了 %d 個效果" % on_kill_results["effects_executed"].size())
 	
-	# 8. 使用者姿態變更（用於起身等自身動作）
-	if action.user_stance_change_enabled:
-		var stance_type: Stance.Type = action.user_stance_change_to
-		user.change_stance(stance_type, -1)
-		result["stance_changed"] = true
-		_update_player_stance(user, stance_type)
-		print("  [姿態變更] %s 變更為 %s" % [user.get_display_name(), Stance.get_stance_name(stance_type)])
+	else:
+		# === 未命中：執行 ON_MISS 效果 ===
+		if action.uses_effect_components():
+			var context = EffectExecutor.build_context(self, action, user, target, {"hit": false, "miss": true})
+			var on_miss_results = EffectExecutor.execute_effects(
+				action, EffectComponent.ExecutionTime.ON_MISS, user, target, context
+			)
+			print("  [ON_MISS 效果] 執行了 %d 個效果" % on_miss_results["effects_executed"].size())
 	
-	# 9. 特殊動作效果（如恢復體力）
+	# 8. 特殊動作效果（如恢復體力）- 保留舊系統
 	if "rest" in action.tags:
 		var stamina_restore = 20
 		set_current_stamina(user, get_current_stamina(user) + stamina_restore)
