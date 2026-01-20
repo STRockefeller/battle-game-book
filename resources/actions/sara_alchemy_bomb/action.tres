@@ -11,20 +11,13 @@ action_assets = null
 animation_duration = 0.6
 cost_stamina = 9
 cost_mp = 12
-cast_time = 0
 cooldown = 1
 allowed_stances = PackedStringArray()
 disallowed_stances = PackedStringArray()
 tags = PackedStringArray("alchemy", "magic", "ranged", "aoe")
 
-damage_multiplier = 1.2
-power = 18
-accuracy_modifier = 0
-critical_modifier = 0.2
-applicable_ranges = PackedStringArray("mid", "far")
-out_of_range_penalty = {}
-effects_on_hit = PackedStringArray()
-effects_on_use = PackedStringArray()
-target_stance_change_to = ""
-user_stance_change_to = ""
+accuracy = 100.0
+critical_rate = 0.0
+effects = []
+
 priority = 1

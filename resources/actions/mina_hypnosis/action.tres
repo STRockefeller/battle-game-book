@@ -11,20 +11,13 @@ action_assets = null
 animation_duration = 1
 cost_stamina = 12
 cost_mp = 18
-cast_time = 2
 cooldown = 3
 allowed_stances = PackedStringArray()
 disallowed_stances = PackedStringArray()
 tags = PackedStringArray("mind", "magic", "control")
 
-damage_multiplier = 0
-power = 0
-accuracy_modifier = -0.2
-critical_modifier = 0
-applicable_ranges = PackedStringArray("mid", "far")
-out_of_range_penalty = {}
-effects_on_hit = PackedStringArray()
-effects_on_use = PackedStringArray()
-target_stance_change_to = "knocked_down"
-user_stance_change_to = ""
+accuracy = 100.0
+critical_rate = 0.0
+effects = []
+
 priority = 3

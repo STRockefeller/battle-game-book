@@ -11,20 +11,13 @@ action_assets = null
 animation_duration = 0.6
 cost_stamina = 8
 cost_mp = 5
-cast_time = 0
 cooldown = 0
 allowed_stances = PackedStringArray()
 disallowed_stances = PackedStringArray()
 tags = PackedStringArray("nature", "physical", "close")
 
-damage_multiplier = 1.3
-power = 14
-accuracy_modifier = 0.2
-critical_modifier = 0.5
-applicable_ranges = PackedStringArray("close", "mid")
-out_of_range_penalty = {}
-effects_on_hit = PackedStringArray()
-effects_on_use = PackedStringArray()
-target_stance_change_to = ""
-user_stance_change_to = ""
+accuracy = 100.0
+critical_rate = 0.0
+effects = []
+
 priority = 1
