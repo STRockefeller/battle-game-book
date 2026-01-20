@@ -1,4 +1,4 @@
-# PassiveTrait.gd
+﻿# PassiveTrait.gd
 # 被動特質定義 - 改為純代碼定義，不使用tres資源文件
 
 class_name PassiveTrait
@@ -13,11 +13,11 @@ var name: String = ""
 ## 特質描述
 var description: String = ""
 
-## 該特質提供的效果列表
-var effects: Array[Effect] = []
+## 該特質提供的修正器列表
+var modifiers: Array[StatModifier] = []
 
 ## 條件觸發(可為null表示無條件)
-var conditions: Array[EffectCondition] = []
+var conditions: Array[ModifierCondition] = []
 
 ## 不能與哪些特質共存
 var incompatible_trait_ids: Array[String] = []
@@ -33,12 +33,12 @@ func _init(p_id: String = "", p_name: String = "", p_description: String = "") -
     name = p_name
     description = p_description
 
-## 轉換為效果修正器
-func to_modifier() -> EffectModifier:
-    var modifier = EffectModifier.new(id, "passive", effects)
+## 轉換為修正器組
+func to_group() -> ModifierGroup:
+    var group = ModifierGroup.new(id, "passive", modifiers)
     if not conditions.is_empty():
-        modifier.condition = conditions[0]  # 當前支持單條件，可擴展
-    return modifier
+        group.condition = conditions[0]  # 當前支持單條件，可擴展
+    return group
 
 ## 檢查是否與另一個特質衝突
 func conflicts_with(other_trait: PassiveTrait) -> bool:

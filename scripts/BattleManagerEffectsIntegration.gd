@@ -1,4 +1,4 @@
-# BattleManagerEffectsIntegration.gd
+﻿# BattleManagerEffectsIntegration.gd
 # 示例代碼 - 展示如何在 BattleManager 中集成效果系統
 # 這不是完整的 BattleManager，僅顯示相關的集成點
 
@@ -6,7 +6,7 @@ class_name BattleManagerEffectsIntegration
 extends Node
 
 ## 效果管理器
-var effect_manager: EffectManager
+var modifier_manager: StatModifierManager
 
 ## 活躍的神恩任務
 var active_divine_tasks: Array[DivineBlessingTask] = []
@@ -32,14 +32,14 @@ func initialize_effects(player: Character, opponent: Character,
 	selected_passive_traits = traits
 	
 	# 創建效果管理器
-	effect_manager = EffectManager.new()
+	modifier_manager = StatModifierManager.new()
 	
 	# 添加被動特質
 	for trait_id in selected_passive_traits:
 		var passive_trait = PassiveTraitLibrary.get_trait_by_id(trait_id)
 		if passive_trait:
-			var modifier = passive_trait.to_modifier()
-			effect_manager.add_modifier(modifier)
+			var group = passive_trait.to_group()
+			modifier_manager.add_group(group)
 			print("Added passive trait: %s" % passive_trait.name)
 	
 	# 初始化神恩任務
@@ -66,14 +66,14 @@ func _initialize_divine_tasks(difficulty: int) -> void:
 ## 回合開始
 func start_turn(_turn: int) -> void:
 	# 更新所有效果修正器（減少持續時間，移除過期效果）
-	effect_manager.tick()
+	modifier_manager.tick()
 	
 	# 檢查神恩任務完成情況
 	var completed_tasks = []
 	for task in active_divine_tasks:
 		if task.is_completed():
-			var blessing = task.to_modifier()
-			effect_manager.add_modifier(blessing)
+			var blessing = task.to_group()
+			modifier_manager.add_group(blessing)
 			completed_tasks.append(task)
 			print("Divine task completed: %s" % task.name)
 	
@@ -94,7 +94,7 @@ func calculate_final_damage(attacker: Character, defender: Character,
 	var damage = float(base_damage)
 	
 	# 應用傷害加成效果
-	damage = effect_manager.apply_effects(
+	damage = modifier_manager.apply_modifiers(
 		"damage_bonus",
 		damage,
 		attacker,
@@ -105,7 +105,7 @@ func calculate_final_damage(attacker: Character, defender: Character,
 	)
 	
 	# 應用防禦減傷效果
-	damage = damage * (1.0 - effect_manager.apply_effects(
+	damage = damage * (1.0 - modifier_manager.apply_modifiers(
 		"defense_bonus",
 		0.0,
 		defender,
@@ -123,7 +123,7 @@ func calculate_final_healing(healer: Character, target: Character,
 	var healing = float(base_healing)
 	
 	# 應用治療加成效果
-	healing = effect_manager.apply_effects(
+	healing = modifier_manager.apply_modifiers(
 		"hp_recovery",
 		healing,
 		healer,
@@ -142,7 +142,7 @@ func calculate_stamina_cost(character: Character, action: Action) -> int:
 	var base_cost = action.cost_stamina
 	
 	# 應用體力消耗減少效果
-	var modified_cost = effect_manager.apply_effects(
+	var modified_cost = modifier_manager.apply_modifiers(
 		"stamina_cost_reduction",
 		float(base_cost),
 		character,
@@ -158,7 +158,7 @@ func calculate_stamina_cost(character: Character, action: Action) -> int:
 func calculate_mp_cost(character: Character, action: Action) -> int:
 	var base_cost = action.cost_mp
 	
-	var modified_cost = effect_manager.apply_effects(
+	var modified_cost = modifier_manager.apply_modifiers(
 		"mp_cost_reduction",
 		float(base_cost),
 		character,
@@ -191,12 +191,12 @@ func on_action_executed(actor: Character, action: Action) -> void:
 
 ## 檢查是否有特定來源的活躍效果
 func has_active_effect_from_source(source: String) -> bool:
-	return effect_manager.has_modifier_from_source(source)
+	return modifier_manager.has_modifier_from_source(source)
 
 ## 獲取所有活躍的傷害加成效果
 func get_damage_modifiers(attacker: Character, defender: Character, 
-                         action: Action) -> Array[EffectModifier]:
-	return effect_manager.get_active_modifiers(
+                         action: Action) -> Array[ModifierGroup]:
+	return modifier_manager.get_active_modifiers(
 		"damage_bonus",
 		attacker,
 		defender,
@@ -207,7 +207,7 @@ func get_damage_modifiers(attacker: Character, defender: Character,
 ## 獲取調試信息
 func get_effects_debug_info() -> String:
 	var info = "=== EFFECT MANAGER DEBUG ===\n"
-	info += effect_manager.get_debug_info()
+	info += modifier_manager.get_debug_info()
 	info += "\n=== ACTIVE DIVINE TASKS ===\n"
 	for task in active_divine_tasks:
 		info += "- %s (deity: %s, completed: %s)\n" % [
@@ -225,7 +225,7 @@ func print_effects_debug() -> void:
 
 ## 戰鬥結束時清理
 func cleanup() -> void:
-	effect_manager.clear()
+	modifier_manager.clear()
 	active_divine_tasks.clear()
 
 # ==================== 示例使用 ====================

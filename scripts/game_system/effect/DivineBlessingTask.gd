@@ -53,7 +53,7 @@ func get_difficulty_name() -> String:
 
 ## 檢查條件是否滿足(用於更新進度)
 func check_progress(_character: Character, _opponent: Character, 
-                    _action: Action, _turn: int) -> void:
+					_action: Action, _turn: int) -> void:
 	# 由具體的任務判定腳本處理
 	# 這裡作為基礎框架，具體實現在子類或Battle系統中
 	pass
@@ -81,4 +81,3 @@ func to_group() -> ModifierGroup:
 func _to_string() -> String:
 	var status = "已完成" if completed else "進行中"
 	return "DivineBlessingTask(%s - %s: %s)" % [deity_id, get_difficulty_name(), status]
-

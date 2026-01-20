@@ -1,8 +1,8 @@
-# Effect.gd
-# 單個效果定義類
-# 定義了對某個屬性的具體修正操作
+﻿# StatModifier.gd
+# 單個屬性修正器定義類
+# 定義了對某個屬性的具體修正操作（用於被動特質、神恩等）
 
-class_name Effect
+class_name StatModifier
 extends RefCounted
 
 ## 屬性標識符
@@ -44,4 +44,4 @@ func applies_to_tags(action_tags: Array[String]) -> bool:
 
 func _to_string() -> String:
 	var filter_str = ", tags: [%s]" % ", ".join(tags_filter) if not tags_filter.is_empty() else ""
-	return "Effect(%s %s %.2f%s)" % [property, operation, value, filter_str]
+	return "StatModifier(%s %s %.2f%s)" % [property, operation, value, filter_str]

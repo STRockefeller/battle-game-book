@@ -1,8 +1,8 @@
-# EffectCondition.gd
-# 效果觸發條件系統
+﻿# ModifierCondition.gd
+# 修正器觸發條件系統
 # 支持多種條件組合(HP百分比、姿態、行動標籤、回合數等)
 
-class_name EffectCondition
+class_name ModifierCondition
 extends RefCounted
 
 ## HP條件: 目標HP百分比必須在此範圍內 (0-1)
@@ -107,5 +107,5 @@ func _to_string() -> String:
 	if not required_action_tags.is_empty():
 		conditions.append("Tags: [%s]" % ", ".join(required_action_tags))
 	if required_stances.is_empty() and required_action_tags.is_empty() and required_hp_range.x < 0:
-		return "EffectCondition(無條件)"
-	return "EffectCondition(%s)" % ", ".join(conditions)
+		return "ModifierCondition(無條件)"
+	return "ModifierCondition(%s)" % ", ".join(conditions)

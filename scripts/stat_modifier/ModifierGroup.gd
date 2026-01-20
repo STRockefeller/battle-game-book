@@ -1,8 +1,8 @@
-# EffectModifier.gd
-# 效果修正器 - 管理一個效果的應用
-# 包含效果本身、觸發條件、來源等信息
+﻿# ModifierGroup.gd
+# 修正器組 - 管理一組屬性修正器的應用
+# 包含多個修正器、觸發條件、來源等信息
 
-class_name EffectModifier
+class_name ModifierGroup
 extends RefCounted
 
 ## 修正器唯一標識
@@ -11,11 +11,11 @@ var id: String = ""
 ## 效果來源: "passive" / "divine" / "stance" / "status"
 var source: String = "passive"
 
-## 該修正器包含的所有效果
-var effects: Array[Effect] = []
+## 該修正器組包含的所有屬性修正器
+var modifiers: Array[StatModifier] = []
 
 ## 觸發條件(可為null表示無條件)
-var condition: EffectCondition = null
+var condition: ModifierCondition = null
 
 ## 是否當前激活
 var active: bool = true
@@ -27,10 +27,10 @@ var duration: int = -1
 var remaining_uses: int = -1
 
 func _init(p_id: String = "", p_source: String = "passive", 
-           p_effects: Array[Effect] = [], p_condition: EffectCondition = null) -> void:
+           p_modifiers: Array[StatModifier] = [], p_condition: ModifierCondition = null) -> void:
 	id = p_id
 	source = p_source
-	effects = p_effects
+	modifiers = p_modifiers
 	condition = p_condition
 
 ## 檢查修正器是否應該被應用
@@ -60,24 +60,24 @@ func tick() -> void:
 		if duration == 0:
 			active = false
 
-## 獲取特定屬性的所有效果
-func get_effects_for_property(property: String) -> Array[Effect]:
-	return effects.filter(func(e: Effect) -> bool: return e.property == property)
+## 獲取特定屬性的所有修正器
+func get_modifiers_for_property(property: String) -> Array[StatModifier]:
+	return modifiers.filter(func(m: StatModifier) -> bool: return m.property == property)
 
 ## 檢查是否適用於特定的行動標籤
 func applies_to_tags(action_tags: Array[String]) -> bool:
-	# 如果沒有效果，不適用
-	if effects.is_empty():
+	# 如果沒有修正器，不適用
+	if modifiers.is_empty():
 		return false
 	
-	# 只要有一個效果適用，就返回true
-	for effect in effects:
-		if effect.applies_to_tags(action_tags):
+	# 只要有一個修正器適用，就返回true
+	for modifier in modifiers:
+		if modifier.applies_to_tags(action_tags):
 			return true
 	
 	return false
 
 func _to_string() -> String:
 	var duration_str = "永久" if duration == -1 else "%d回合" % duration
-	var effect_count = effects.size()
-	return "EffectModifier(%s, 源: %s, 效果數: %d, %s)" % [id, source, effect_count, duration_str]
+	var modifier_count = modifiers.size()
+	return "ModifierGroup(%s, 源: %s, 修正器數: %d, %s)" % [id, source, modifier_count, duration_str]

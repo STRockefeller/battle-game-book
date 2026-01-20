@@ -38,7 +38,7 @@ var player2: Character
 var characters: Array[Character] = []
 
 # 效果系統（用於被動特質等）
-var effect_manager
+var modifier_manager
 
 # AI 行為
 var player1_ai: AIBehavior
@@ -77,19 +77,19 @@ func _ready():
 	characters = [player1, player2]
 
 	# 設置效果系統並套用被動特質
-	effect_manager = EffectManager.new()
+	modifier_manager = StatModifierManager.new()
 	var p_traits = BattleConfig.get_player_passive_traits()
 	var e_traits = BattleConfig.get_enemy_passive_traits()
 	for tid in p_traits:
 		var pasive_trait = PassiveTraitLibrary.get_trait_by_id(tid)
 		if pasive_trait:
-			var mod = pasive_trait.to_modifier()
-			effect_manager.add_modifier(mod)
+			var mod = pasive_trait.to_group()
+			modifier_manager.add_group(mod)
 	for tid in e_traits:
 		var trait_e = PassiveTraitLibrary.get_trait_by_id(tid)
 		if trait_e:
-			var mod_e = trait_e.to_modifier()
-			effect_manager.add_modifier(mod_e)
+			var mod_e = trait_e.to_group()
+			modifier_manager.add_group(mod_e)
 	
 	# 初始化戰鬥狀態
 	var BattleStateClass = load("res://scripts/BattleState.gd")
@@ -481,11 +481,11 @@ func calculate_action_cost(user: Character, target: Character, action: Action) -
 	var stamina_reduction = 0.0
 	var mp_reduction = 0.0
 	
-	if effect_manager:
-		stamina_reduction = effect_manager.apply_effects(
+	if modifier_manager:
+		stamina_reduction = modifier_manager.apply_modifiers(
 			"stamina_cost_reduction", 0.0, user, target, action, state.turn, action.tags
 		)
-		mp_reduction = effect_manager.apply_effects(
+		mp_reduction = modifier_manager.apply_modifiers(
 			"mp_cost_reduction", 0.0, user, target, action, state.turn, action.tags
 		)
 	
@@ -502,13 +502,13 @@ func calculate_final_damage(attacker: Character, defender: Character, action: Ac
 	var damage_bonus = 0.0
 	var defense_reduction = 0.0
 	
-	if effect_manager:
-		# 攻擊方的傷害加成
-		damage_bonus = effect_manager.apply_effects(
+	if modifier_manager:
+		# 攻擊者的傷害加成
+		damage_bonus = modifier_manager.apply_modifiers(
 			"damage_bonus", 0.0, attacker, defender, action, state.turn, action.tags
 		)
-		# 防守方的減傷
-		defense_reduction = effect_manager.apply_effects(
+		# 防禦者的減傷
+		defense_reduction = modifier_manager.apply_modifiers(
 			"damage_reduction", 0.0, defender, attacker, action, state.turn, action.tags
 		)
 	
@@ -526,13 +526,13 @@ func calculate_critical_result(attacker: Character, defender: Character, action:
 	var crit_rate_bonus = 0.0
 	var crit_multiplier = 1.5  # 預設爆擊倍率
 	
-	if effect_manager:
-		# 爆擊率加成
-		crit_rate_bonus = effect_manager.apply_effects(
+	if modifier_manager:
+		# 暴擊率加成
+		crit_rate_bonus = modifier_manager.apply_modifiers(
 			"critical_rate", 0.0, attacker, defender, action, state.turn, action.tags
 		)
-		# 爆擊傷害倍率
-		crit_multiplier = effect_manager.apply_effects(
+		# 暴擊傷害倍率
+		crit_multiplier = modifier_manager.apply_modifiers(
 			"critical_damage_multiplier", 1.5, attacker, defender, action, state.turn, action.tags
 		)
 	
